@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (!phone || !token || typeof phone !== "string" || typeof token !== "string") {
       return NextResponse.json(
-        { error: "Kailangan ang numero at verification code. Subukan muli." },
+        { error: "Phone number and verification code are required. Try again." },
         { status: 400 }
       );
     }
@@ -78,14 +78,14 @@ export async function POST(request: NextRequest) {
             } else {
               console.error("[OTP dev] createUser failed (existing?) and user not found:", createError.message);
               return NextResponse.json(
-                { error: `Hindi ma-create ang user: ${createError.message}. Subukan ibang numero o tunay na OTP.` },
+                { error: `Could not create user: ${createError.message}. Try a different number or real OTP.` },
                 { status: 400 }
               );
             }
           } else {
             console.error("[OTP dev] createUser failed:", createError.message);
             return NextResponse.json(
-              { error: `Hindi ma-create ang user: ${createError.message}. Subukan muli o gamitin ang tunay na OTP.` },
+              { error: `Could not create user: ${createError.message}. Try again or use a real OTP.` },
               { status: 400 }
             );
           }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
           });
         } else {
           return NextResponse.json(
-            { error: "May nangyaring error sa pag-create ng user. Subukan muli." },
+            { error: "Something went wrong creating the user. Try again." },
             { status: 500 }
           );
         }
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       if (linkError || !linkData?.properties?.hashed_token) {
         console.error("[OTP dev] generateLink failed:", linkError?.message ?? "no hashed_token");
         return NextResponse.json(
-          { error: "Hindi ma-generate ang session. Subukan muli." },
+          { error: "Could not generate session. Try again." },
           { status: 500 }
         );
       }
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       if (verifyError || !verifyData.user?.id) {
         console.error("[OTP dev] verifyOtp failed:", verifyError?.message);
         return NextResponse.json(
-          { error: "Invalid o expired ang code. Subukan muli." },
+          { error: "Invalid or expired code. Try again." },
           { status: 400 }
         );
       }
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     const user = data.user;
     if (!user?.id) {
       return NextResponse.json(
-        { error: "May nangyaring error. Subukan muli." },
+        { error: "Something went wrong. Try again." },
         { status: 500 }
       );
     }

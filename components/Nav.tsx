@@ -32,34 +32,56 @@ function NavLink({
   );
 }
 
+function DesktopNavLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`px-3 py-2 text-sm font-body font-semibold text-white transition-colors hover:text-white/90 ${
+        active ? "border-b-2 border-action-orange" : ""
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function Nav({ userRole, isAuthenticated }: NavProps) {
   const pathname = usePathname();
 
   if (!isAuthenticated) {
     return (
-      <nav className="sticky top-0 z-40 border-b border-warm-border-input bg-white px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center justify-between border-b border-white/10 bg-kumpuni-blue px-4 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
         <Link
           href="/"
-          className="font-heading text-lg font-bold text-kumpuni-blue"
+          className="font-display text-xl lg:text-2xl font-extrabold tracking-tight text-white"
+          style={{ letterSpacing: "-0.5px" }}
         >
           Kumpuni
         </Link>
         <div className="flex items-center gap-2">
           <Link
             href="/how-it-works"
-            className="min-h-touch min-w-touch inline-flex items-center justify-center gap-1 px-2 text-caption text-slate-text hover:text-kumpuni-blue"
+            className="min-h-touch min-w-touch inline-flex items-center justify-center gap-1 px-2 text-[13px] text-white/80 hover:text-white"
           >
             <HelpCircle className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Paano ito gumagana?</span>
+            <span className="hidden sm:inline">How it works</span>
           </Link>
           <Link
             href="/login?role=homeowner&next=/jobs/new"
-            className="btn-primary min-h-[44px] px-4 py-2 text-sm"
+            className="btn-primary min-h-[48px] px-6 text-[15px]"
           >
-            MAG-LOG IN
+            LOG IN
           </Link>
         </div>
-      </nav>
+      </header>
     );
   }
 
@@ -68,24 +90,68 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
 
   return (
     <>
-      {/* Top bar: logo only when authenticated (main nav is bottom) */}
-      <header className="sticky top-0 z-40 border-b border-warm-border-input bg-white px-4 py-2 flex items-center justify-between md:justify-center">
-        <Link
-          href={showHomeowner ? "/" : "/worker/dashboard"}
-          className="font-heading text-lg font-bold text-kumpuni-blue"
-        >
-          Kumpuni
-        </Link>
+      {/* Header: brand + desktop nav (lg+) */}
+      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center justify-between border-b border-white/10 bg-kumpuni-blue px-4 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
+        <div className="flex flex-col">
+          <Link
+            href={showHomeowner ? "/" : "/worker/dashboard"}
+            className="font-display text-xl lg:text-2xl font-extrabold tracking-tight text-white"
+            style={{ letterSpacing: "-0.5px" }}
+          >
+            Kumpuni
+          </Link>
+          <p className="text-[12px] text-white/60 lg:hidden">
+            Find your fix
+          </p>
+        </div>
+
+        {/* Desktop nav: only on lg+ */}
+        <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+          <DesktopNavLink href="/" active={pathname === "/"}>
+            Home
+          </DesktopNavLink>
+          {showHomeowner && (
+            <DesktopNavLink
+              href="/dashboard"
+              active={
+                pathname === "/dashboard" || (pathname?.startsWith("/jobs/") ?? false)
+              }
+            >
+              My Jobs
+            </DesktopNavLink>
+          )}
+          {showWorker && !showHomeowner && (
+            <DesktopNavLink
+              href="/worker/jobs"
+              active={pathname?.startsWith("/worker/jobs") ?? false}
+            >
+              My Jobs
+            </DesktopNavLink>
+          )}
+          {showHomeowner && (
+            <DesktopNavLink href="/jobs/new" active={pathname === "/jobs/new"}>
+              Post a Job
+            </DesktopNavLink>
+          )}
+          <DesktopNavLink
+            href={showWorker ? "/worker/dashboard" : "/dashboard"}
+            active={
+              pathname === "/worker/dashboard" || pathname === "/dashboard"
+            }
+          >
+            My Profile
+          </DesktopNavLink>
+        </nav>
       </header>
 
-      {/* Bottom tab bar */}
+      {/* Bottom tab bar: only on mobile/tablet (< lg) */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 h-[60px] safe-area-bottom bg-white shadow-nav-top flex items-stretch max-w-[480px] mx-auto"
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[60px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.06)] flex items-stretch max-w-[480px] mx-auto pb-[env(safe-area-inset-bottom)]"
         aria-label="Main navigation"
       >
         <NavLink href="/" active={pathname === "/"}>
           <Home className="h-5 w-5" strokeWidth={2} />
-          Bahay
+          Home
         </NavLink>
         {showHomeowner && (
           <NavLink
@@ -95,7 +161,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             }
           >
             <Briefcase className="h-5 w-5" strokeWidth={2} />
-            Mga Job ko
+            My Jobs
           </NavLink>
         )}
         {showWorker && !showHomeowner && (
@@ -104,24 +170,23 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             active={pathname?.startsWith("/worker/jobs") ?? false}
           >
             <Briefcase className="h-5 w-5" strokeWidth={2} />
-            Mga Job
+            My Jobs
           </NavLink>
         )}
         {showHomeowner && (
           <NavLink href="/jobs/new" active={pathname === "/jobs/new"}>
             <PlusCircle className="h-5 w-5" strokeWidth={2} />
-            Mag-post
+            Post Job
           </NavLink>
         )}
         <NavLink
           href={showWorker ? "/worker/dashboard" : "/dashboard"}
           active={
-            pathname === "/worker/dashboard" ||
-            pathname === "/dashboard"
+            pathname === "/worker/dashboard" || pathname === "/dashboard"
           }
         >
           <User className="h-5 w-5" strokeWidth={2} />
-          Profile ko
+          Profile
         </NavLink>
       </nav>
     </>

@@ -59,7 +59,7 @@ export default function WorkerProfileModal({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Hindi ma-load ang numero.");
+        setError(data.error || "Could not load number.");
         return;
       }
       setPhone(data.phone || "");
@@ -170,7 +170,7 @@ export default function WorkerProfileModal({
             onClick={handleContact}
             className="min-h-touch w-full rounded-lg bg-blue-600 px-4 font-medium text-white disabled:opacity-50"
           >
-            {loading ? "Naglo-load..." : "Contact (ipakita ang numero)"}
+            {loading ? "Loading..." : "Contact (show number)"}
           </button>
         )}
 

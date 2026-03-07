@@ -9,11 +9,11 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { user, role } = await getSessionRole(supabase);
     if (!user) {
-      return NextResponse.json({ error: "Kailangan mag-log in." }, { status: 401 });
+      return NextResponse.json({ error: "Please log in." }, { status: 401 });
     }
     if (!canUseHomeownerFeatures(role)) {
       return NextResponse.json(
-        { error: "Para sa homeowners lang ang pag-post ng job." },
+        { error: "Only homeowners can post jobs." },
         { status: 403 }
       );
     }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (!category || !description || typeof lat !== "number" || typeof lng !== "number") {
       return NextResponse.json(
-        { error: "Kailangan ang category, description, at lokasyon." },
+        { error: "Category, description, and location are required." },
         { status: 400 }
       );
     }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("Jobs API error:", err);
     return NextResponse.json(
-      { error: "May nangyaring error. Subukan muli." },
+      { error: "Something went wrong. Try again." },
       { status: 500 }
     );
   }

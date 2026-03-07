@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import BrowseWorkersView from "@/components/BrowseWorkersView";
+import { PageContainer } from "@/components/PageContainer";
 
 export default async function JobBrowsePage({
   params,
@@ -24,11 +25,13 @@ export default async function JobBrowsePage({
 
   if (error || !job) {
     return (
-      <main className="min-h-screen p-4">
-        <p className="text-red-600">Job hindi mahanap.</p>
-        <Link href="/dashboard" className="mt-2 inline-block text-blue-600 underline">
-          Balik sa dashboard
-        </Link>
+      <main className="min-h-screen page-bg pt-6">
+        <PageContainer wide>
+          <p className="text-danger-red text-body">Job not found.</p>
+          <Link href="/dashboard" className="mt-2 inline-block btn-ghost">
+            Back to dashboard
+          </Link>
+        </PageContainer>
       </main>
     );
   }
@@ -43,12 +46,16 @@ export default async function JobBrowsePage({
       : 3.0;
 
   return (
-    <main className="min-h-screen p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold mb-2">Browse workers</h1>
-      <p className="text-sm text-gray-600 mb-4">
-        Tingnan ang list at map ng workers na malapit. Piliin ang minimum rating, tapos i-tap ang worker para makita ang profile at &quot;Contact&quot; para ipakita ang numero.
-      </p>
-      <BrowseWorkersView jobId={id} initialMinRating={safeRating} />
+    <main className="min-h-screen page-bg pt-6 pb-6">
+      <PageContainer wide>
+        <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+          Workers
+        </h1>
+        <p className="text-[13px] text-muted-gray font-body mb-4">
+          View the list and map of workers nearby. Set minimum rating, then tap a worker to see their profile and Contact to reveal their number.
+        </p>
+        <BrowseWorkersView jobId={id} initialMinRating={safeRating} />
+      </PageContainer>
     </main>
   );
 }

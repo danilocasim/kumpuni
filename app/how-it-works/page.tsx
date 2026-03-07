@@ -1,46 +1,47 @@
 import Link from "next/link";
+import { PageContainer } from "@/components/PageContainer";
 
 export default function HowItWorksPage() {
   const steps = [
     {
       num: 1,
-      title: "Mag-post ng Job",
-      desc: "Ilagay ang problema mo, lokasyon, at kailangan mo ba ASAP o pwedeng this week. May option din para sa budget.",
+      title: "Post a job",
+      desc: "Describe the problem, set your location, and choose ASAP or this week. You can also set a budget range.",
     },
     {
       num: 2,
-      title: "Makipag-match sa worker",
-      desc: "Para sa urgent (ASAP), may 15-min countdown at real-time list ng interested workers. Para sa scheduled, browse at i-compare ang workers na malapit sa'yo.",
+      title: "Match with a worker",
+      desc: "For urgent (ASAP) jobs, there’s a 15-minute countdown and a real-time list of interested workers. For scheduled jobs, browse and compare workers near you.",
     },
     {
       num: 3,
-      title: "Trabaho na",
-      desc: "Pag napili na ang worker, makikita niyo ang contact at address. Diretso na ang usapan at bayaran—cash. Pagkatapos, mag-rate kayo isa't isa.",
+      title: "Get it done",
+      desc: "Once you pick a worker, you’ll see their contact and address. Coordinate and pay in cash. Then rate each other.",
     },
   ];
 
   return (
-    <main className="min-h-screen p-4">
-      <div className="max-w-lg mx-auto py-8">
-        <h1 className="text-2xl font-bold text-center mb-2">
-          Paano ito gumagana?
+    <main className="min-h-screen page-bg pt-6 pb-12">
+      <PageContainer>
+        <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text text-center mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+          How it works
         </h1>
-        <p className="text-center text-gray-600 mb-10">
-          Tatlong hakbang lang para makahanap ng skilled worker.
+        <p className="text-center text-muted-gray font-body text-[15px] mb-10">
+          Three simple steps to find a skilled worker.
         </p>
 
         <ol className="space-y-8">
           {steps.map((step) => (
             <li key={step.num} className="flex gap-4">
               <span
-                className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold"
+                className="flex-shrink-0 w-10 h-10 rounded-full bg-kumpuni-blue text-white flex items-center justify-center font-display font-bold"
                 aria-hidden
               >
                 {step.num}
               </span>
               <div>
-                <h2 className="font-semibold text-lg">{step.title}</h2>
-                <p className="text-gray-600 mt-1">{step.desc}</p>
+                <h2 className="font-display font-bold text-[20px] lg:text-[22px] text-slate-text">{step.title}</h2>
+                <p className="text-muted-gray font-body text-[15px] mt-1">{step.desc}</p>
               </div>
             </li>
           ))}
@@ -49,12 +50,12 @@ export default function HowItWorksPage() {
         <div className="mt-12 text-center">
           <Link
             href="/"
-            className="min-h-touch min-w-touch inline-flex items-center justify-center px-6 rounded-lg bg-blue-600 text-white font-medium"
+            className="btn-primary inline-flex items-center justify-center"
           >
-            Mag-post ng Job
+            POST A JOB
           </Link>
         </div>
-      </div>
+      </PageContainer>
     </main>
   );
 }

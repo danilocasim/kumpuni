@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import ShareLocationButton from "@/components/ShareLocationButton";
 import WorkerAvailabilitySection from "@/components/WorkerAvailabilitySection";
+import { PageContainer } from "@/components/PageContainer";
 
 const CATEGORY_LABELS: Record<string, string> = {
   plumbing: "Plumbing",
@@ -96,17 +97,18 @@ export default async function WorkerDashboardPage({
   const completeness = computeCompleteness(profile, userRow);
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-lg mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-2">
+    <main className="min-h-screen page-bg pt-6 pb-6">
+      <PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
         Worker dashboard
       </h1>
       <p className="text-body text-muted-gray mb-6">
-        Dito mo makikita ang availability, active job, at job history.
+        Here you see your availability, active job, and job history.
       </p>
 
       {message === "homeowner_only" && (
         <div className="mb-4 p-3 rounded-kumpuni-sm bg-blue-light/50 border border-kumpuni-blue/30 text-body text-slate-text">
-          Para sa homeowners lang ang pag-post ng job. Bilang worker, dito mo makikita ang mga job at profile mo.
+          Only homeowners can post jobs. As a worker, you see your jobs and profile here.
         </div>
       )}
 
@@ -128,7 +130,7 @@ export default async function WorkerDashboardPage({
           </>
         )}
         <p className="text-caption text-muted-gray mt-1">
-          Verified: {completeness.isVerified ? "Oo" : "Hindi pa"}
+          Verified: {completeness.isVerified ? "Yes" : "Not yet"}
         </p>
         <Link href="/worker/setup" className="btn-ghost text-caption mt-2 inline-block">
           I-edit ang profile
@@ -171,7 +173,7 @@ export default async function WorkerDashboardPage({
               href={`/worker/jobs/${activeJob.id}`}
               className="btn-secondary mt-3 w-full inline-flex justify-center"
             >
-              Tingnan ang job detail
+              View job detail
             </Link>
           </div>
         )}
@@ -182,7 +184,7 @@ export default async function WorkerDashboardPage({
             Job history
           </h2>
           {historyJobs.length === 0 ? (
-            <p className="text-body text-muted-gray">Wala pang natapos na job.</p>
+            <p className="text-body text-muted-gray">No completed jobs yet.</p>
           ) : (
             <ul className="space-y-2">
               {historyJobs.map((job) => (
@@ -223,11 +225,12 @@ export default async function WorkerDashboardPage({
 
         <Link
           href="/worker/jobs"
-          className="btn-primary w-full inline-flex justify-center"
+          className="btn-primary w-full lg:w-auto inline-flex justify-center"
         >
-          Tingnan ang available jobs
+          View available jobs
         </Link>
       </div>
+      </PageContainer>
     </main>
   );
 }

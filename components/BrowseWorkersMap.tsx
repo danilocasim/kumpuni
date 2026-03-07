@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { MapFitBounds } from "@/components/MapFitBounds";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -52,9 +53,11 @@ export type WorkerMarker = {
 
 export default function BrowseWorkersMap({
   workers,
+  jobLocation,
   onSelectWorker,
 }: {
   workers: WorkerMarker[];
+  jobLocation?: { lat: number; lng: number } | null;
   onSelectWorker: (id: string) => void;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -75,12 +78,19 @@ export default function BrowseWorkersMap({
     });
   }, [mounted]);
 
+  // One source of truth: each worker gets their own lat/lng from their service_center (never job location)
   const points = workers
-    .map((w) => ({
-      ...w,
-      service_lat: typeof w.service_lat === "number" ? w.service_lat : parseFloat(String(w.service_lat)),
-      service_lng: typeof w.service_lng === "number" ? w.service_lng : parseFloat(String(w.service_lng)),
-    }))
+    .map((w) => {
+      const lat =
+        typeof w.service_lat === "number"
+          ? w.service_lat
+          : parseFloat(String(w.service_lat ?? ""));
+      const lng =
+        typeof w.service_lng === "number"
+          ? w.service_lng
+          : parseFloat(String(w.service_lng ?? ""));
+      return { ...w, service_lat: lat, service_lng: lng };
+    })
     .filter(
       (w) =>
         Number.isFinite(w.service_lat) &&
@@ -91,25 +101,43 @@ export default function BrowseWorkersMap({
         w.service_lng <= 180
     ) as Array<WorkerMarker & { service_lat: number; service_lng: number }>;
 
+  // All points for fitBounds: job first, then each worker at their own service_center
+  const fitBoundsKey =
+    `${jobLocation?.lat ?? ""}-${jobLocation?.lng ?? ""}` +
+    "|" +
+    points.map((w) => `${w.service_lat},${w.service_lng}`).join(";");
+  const fitBoundsPoints = useMemo(() => {
+    const out: Array<[number, number]> = [];
+    if (jobLocation && Number.isFinite(jobLocation.lat) && Number.isFinite(jobLocation.lng)) {
+      out.push([jobLocation.lat, jobLocation.lng]);
+    }
+    points.forEach((w) => {
+      out.push([Number(w.service_lat), Number(w.service_lng)]);
+    });
+    return out;
+  }, [fitBoundsKey]);
+
+  const center: [number, number] =
+    jobLocation && Number.isFinite(jobLocation.lat) && Number.isFinite(jobLocation.lng)
+      ? [jobLocation.lat, jobLocation.lng]
+      : points.length >= 1
+        ? [points[0].service_lat, points[0].service_lng]
+        : DEFAULT_CENTER;
+  const zoom = points.length >= 1 || jobLocation ? 12 : DEFAULT_ZOOM;
+
   if (!mounted) {
     return (
       <div className="h-64 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
-        Naglo-load ang mapa...
+        Loading map...
       </div>
     );
   }
-
-  const center: [number, number] =
-    points.length >= 1
-      ? [points[0].service_lat, points[0].service_lng]
-      : DEFAULT_CENTER;
-  const zoom = points.length >= 1 ? 13 : DEFAULT_ZOOM;
 
   return (
     <div className="w-full space-y-1">
       <div className="h-64 w-full rounded-lg border border-gray-200 overflow-hidden z-0 bg-gray-100" style={{ minHeight: 256 }}>
         <MapContainer
-          key={`map-${points.length}-${points[0]?.worker_id ?? "empty"}-${center[0]}-${center[1]}`}
+          key={`map-${fitBoundsPoints.length}-${center[0]}-${center[1]}`}
           center={center}
           zoom={zoom}
           className="h-full w-full"
@@ -120,32 +148,44 @@ export default function BrowseWorkersMap({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
+          {fitBoundsPoints.length > 0 && <MapFitBounds points={fitBoundsPoints} padding={[32, 32]} maxZoom={14} />}
+          {/* Job location = "Your job" pin */}
+          {Leaflet && jobLocation && Number.isFinite(jobLocation.lat) && Number.isFinite(jobLocation.lng) && (
+            <Marker position={[jobLocation.lat, jobLocation.lng]} title="Your job location">
+              <Popup>Your job location</Popup>
+            </Marker>
+          )}
+          {/* Worker markers: each at that worker's own service_center (lat/lng), keyed by id+position so they never share a location */}
           {Leaflet &&
-            points.map((w) => (
-              <Marker
-                key={w.worker_id}
-                position={[Number(w.service_lat), Number(w.service_lng)]}
-                icon={createAvatarIcon(Leaflet, w.avatar_url ?? null, w.display_name)}
-                eventHandlers={{
-                  click: () => onSelectWorker(w.worker_id),
-                }}
-              >
-                <Popup>
-                  <button
-                    type="button"
-                    className="text-left font-medium text-blue-600"
-                    onClick={() => onSelectWorker(w.worker_id)}
-                  >
-                    {w.display_name || "Worker"}
-                  </button>
-                </Popup>
-              </Marker>
-            ))}
+            points.map((w) => {
+              const lat = Number(w.service_lat);
+              const lng = Number(w.service_lng);
+              return (
+                <Marker
+                  key={`worker-${w.worker_id}-${lat}-${lng}`}
+                  position={[lat, lng]}
+                  icon={createAvatarIcon(Leaflet, w.avatar_url ?? null, w.display_name)}
+                  eventHandlers={{
+                    click: () => onSelectWorker(w.worker_id),
+                  }}
+                >
+                  <Popup>
+                    <button
+                      type="button"
+                      className="text-left font-medium text-blue-600"
+                      onClick={() => onSelectWorker(w.worker_id)}
+                    >
+                      {w.display_name || "Worker"}
+                    </button>
+                  </Popup>
+                </Marker>
+              );
+            })}
         </MapContainer>
       </div>
       {points.length === 0 && (
         <p className="text-xs text-gray-600 text-center">
-          Walang workers na may lokasyon sa area. Mag-rehistro ang workers malapit sa job mo para lumabas dito.
+          No workers with location in this area. Workers need to register with a service area near your job to appear here.
         </p>
       )}
     </div>

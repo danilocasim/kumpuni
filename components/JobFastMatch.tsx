@@ -82,7 +82,7 @@ export default function JobFastMatch({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Hindi ma-select ang worker.");
+        setError(data.error || "Could not select worker.");
         return;
       }
       setSelectedResult({
@@ -133,7 +133,7 @@ export default function JobFastMatch({
           href={`/jobs/${jobId}`}
           className="mt-4 inline-block min-h-touch min-w-touch rounded-lg bg-green-600 px-4 font-medium text-white inline-flex items-center justify-center"
         >
-          Tingnan ang job
+          View job
         </Link>
       </div>
     );
@@ -144,7 +144,7 @@ export default function JobFastMatch({
       <p className="text-gray-600">
         Na-match na ang job na ito.{" "}
         <Link href={`/jobs/${jobId}`} className="text-blue-600 underline">
-          Tingnan ang job
+          View job
         </Link>
       </p>
     );
@@ -182,8 +182,8 @@ export default function JobFastMatch({
       {!workers.length ? (
         <p className="text-gray-600">
           {isExpired
-            ? "Walang workers sa radius na nag-express ng interest. Automatic na naka-Flexible Match na ang job — pwede mo na tingnan ang listahan sa job detail."
-            : "Wala pang nag-express ng interest. Maghintay lang — real-time ang listahan. Pag walang interested sa 15 min, automatic na maging Flexible ang job."}
+            ? "No workers in radius have expressed interest. The job is now on Flexible Match — you can view the list on the job detail page."
+            : "No one has expressed interest yet. The list updates in real time. If no one is interested within 15 min, the job automatically switches to Flexible Match."}
         </p>
       ) : (
         <ul className="space-y-3">
@@ -212,7 +212,7 @@ export default function JobFastMatch({
                 onClick={() => handleSelect(w.worker_id)}
                 className="min-h-touch min-w-touch rounded-lg bg-blue-600 px-4 font-medium text-white disabled:opacity-50"
               >
-                Piliin
+                Select
               </button>
             </li>
           ))}
@@ -223,7 +223,7 @@ export default function JobFastMatch({
         href={`/jobs/${jobId}`}
         className="inline-block text-sm text-blue-600 underline"
       >
-        Tingnan ang job detail
+        View job detail
       </Link>
     </div>
   );

@@ -47,10 +47,10 @@ export default async function JobReviewPage({
   return (
     <main className="min-h-screen p-4 pb-24 max-w-[480px] mx-auto page-bg">
       <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-2">
-        Mag-iwan ng review
+        Leave a review
       </h1>
       <p className="text-body text-muted-gray mb-6">
-        I-rate at i-review si {revieweeDisplayName} para sa natapos na job.
+        Rate and review {revieweeDisplayName} for the completed job.
       </p>
 
       {existingReview ? (
@@ -59,7 +59,7 @@ export default async function JobReviewPage({
             Salamat! Na-submit na ang review mo para sa job na ito.
           </p>
           <Link href={`/jobs/${id}`} className="btn-primary inline-flex">
-            Balik sa job detail
+            Back to job detail
           </Link>
         </div>
       ) : (

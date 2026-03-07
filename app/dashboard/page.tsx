@@ -2,13 +2,14 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getSessionRole, canUseHomeownerFeatures } from "@/lib/auth-role";
+import { PageContainer } from "@/components/PageContainer";
 
 const STATUS_LABELS: Record<string, string> = {
-  open: "Bukas",
-  matched: "Na-match",
-  in_progress: "Ginagawa",
-  completed: "Tapos na",
-  cancelled: "Na-cancel",
+  open: "Open",
+  matched: "Matched",
+  in_progress: "In progress",
+  completed: "Completed",
+  cancelled: "Cancelled",
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -57,36 +58,47 @@ export default async function DashboardPage({
     reviewedJobIds = (reviews ?? []).map((r) => r.job_id);
   }
 
+  const cardAccentByStatus: Record<string, string> = {
+    open: "card-accent-open",
+    matched: "card-accent-open",
+    in_progress: "card-accent-open",
+    completed: "card-accent-completed",
+    cancelled: "card-accent-cancelled",
+  };
+
   if (error) {
     return (
-      <main className="min-h-screen p-4 page-bg">
-        <p className="text-danger-red text-body">May error sa pag-load ng jobs. Subukan muli.</p>
+      <main className="min-h-screen page-bg pt-6">
+        <PageContainer>
+          <p className="text-danger-red text-body">Error loading jobs. Try again.</p>
+        </PageContainer>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-[480px] mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-6">
-        Mga Job ko
+    <main className="min-h-screen page-bg pt-6 pb-6">
+      <PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-6 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+        My Jobs
       </h1>
       {message === "worker_only" && (
         <div className="mb-4 p-3 rounded-kumpuni-sm bg-blue-light/50 border border-kumpuni-blue/30 text-body text-slate-text">
-          Para sa workers lang ang section na iyon. Dito mo maaaring i-post ang mga job at tingnan ang status.
+          That section is for workers only. Here you can post jobs and view their status.
         </div>
       )}
       {!jobs?.length ? (
         <>
-          <p className="text-body text-slate-text">Wala ka pang na-post na job.</p>
+          <p className="text-body text-slate-text">You haven&apos;t posted any jobs yet.</p>
           <Link href="/jobs/new" className="btn-primary mt-4 inline-flex">
-            MAG-POST NG JOB
+            POST A JOB
           </Link>
         </>
       ) : (
-        <ul className="space-y-card-gap">
+        <ul className="space-y-3">
           {jobs.map((job) => (
             <li key={job.id}>
-              <div className="card-kumpuni p-4">
+              <div className={`card-kumpuni ${cardAccentByStatus[job.status] ?? ""}`}>
                 <Link href={`/jobs/${job.id}`} className="block">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span
@@ -112,14 +124,14 @@ export default async function DashboardPage({
                 {job.status === "open" && (
                   <div className="mt-2 flex gap-2">
                     <Link href={`/jobs/${job.id}`} className="btn-ghost text-caption">
-                      Detalye
+                      Details
                     </Link>
                     {job.matching_mode === "flexible" && (
                       <Link
                         href={`/jobs/${job.id}/browse`}
                         className="btn-ghost text-caption font-medium"
                       >
-                        Tingnan ang workers
+                        Browse workers
                       </Link>
                     )}
                     {job.matching_mode === "fast" && (
@@ -138,7 +150,7 @@ export default async function DashboardPage({
                       href={`/jobs/${job.id}/review`}
                       className="btn-ghost text-caption font-medium text-verified-green"
                     >
-                      Mag-iwan ng review →
+                      Leave a review →
                     </Link>
                   </div>
                 )}
@@ -147,11 +159,12 @@ export default async function DashboardPage({
           ))}
         </ul>
       )}
-      <div className="mt-6">
+      <div className="mt-6 flex justify-start">
         <Link href="/jobs/new" className="btn-primary inline-flex">
-          MAG-POST NG JOB
+          POST A JOB
         </Link>
       </div>
+      </PageContainer>
     </main>
   );
 }

@@ -31,7 +31,7 @@ export default function WorkerProfileMap({
   if (!mounted) {
     return (
       <div className="h-48 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
-        Naglo-load ang mapa...
+        Loading map...
       </div>
     );
   }

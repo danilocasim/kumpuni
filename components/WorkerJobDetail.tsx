@@ -26,7 +26,7 @@ export default function WorkerJobDetail({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Hindi ma-save. Subukan muli.");
+        setError(data.error || "Could not save. Try again.");
         return;
       }
       setDone(true);

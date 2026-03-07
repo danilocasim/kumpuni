@@ -10,7 +10,9 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
+        body: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
         heading: ["var(--font-plus-jakarta)", "var(--font-dm-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-plus-jakarta)", "sans-serif"],
         mono: ["var(--font-jetbrains)", "ui-monospace", "monospace"],
       },
       colors: {

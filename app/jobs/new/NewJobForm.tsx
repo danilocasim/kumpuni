@@ -44,7 +44,7 @@ export default function NewJobForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!location) {
-      setError("Kailangan pumili ng lokasyon.");
+      setError("Please select a location.");
       return;
     }
     setSubmitting(true);
@@ -87,7 +87,7 @@ export default function NewJobForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Hindi masave ang job.");
+      if (!res.ok) throw new Error(data.error || "Could not save job.");
 
       if (urgency === "asap") {
         router.push(`/jobs/${data.id}/fast`);
@@ -95,21 +95,21 @@ export default function NewJobForm() {
         router.push(`/jobs/${data.id}/browse`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "May nangyaring error. Subukan muli.");
+      setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-[480px] mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-6">
-        Mag-post ng Job
+    <>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-6 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+        Post a job
       </h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="category" className="label-kumpuni">
-            Kategorya
+            Category
           </label>
           <select
             id="category"
@@ -118,7 +118,7 @@ export default function NewJobForm() {
             required
             className="input-kumpuni"
           >
-            <option value="">Piliin ang kategorya...</option>
+            <option value="">Select category...</option>
             {CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
@@ -129,7 +129,7 @@ export default function NewJobForm() {
 
         <div>
           <label htmlFor="description" className="label-kumpuni">
-            Deskripsyon (max 500 character)
+            Description (max 500 characters)
           </label>
           <textarea
             id="description"
@@ -146,7 +146,7 @@ export default function NewJobForm() {
         <JobPhotoUpload value={photos} onChange={setPhotos} />
 
         <div>
-          <label className="label-kumpuni">Lokasyon</label>
+          <label className="label-kumpuni">Location</label>
           <LocationPicker value={location} onChange={setLocation} />
         </div>
 
@@ -170,7 +170,7 @@ export default function NewJobForm() {
 
         <div>
           <label htmlFor="budget" className="label-kumpuni">
-            Budget (opsyonal)
+            Budget (optional)
           </label>
           <select
             id="budget"
@@ -178,7 +178,7 @@ export default function NewJobForm() {
             onChange={(e) => setBudget(e.target.value)}
             className="input-kumpuni"
           >
-            <option value="">Piliin...</option>
+            <option value="">Select...</option>
             {BUDGET_OPTIONS.map((b) => (
               <option key={b.value} value={b.value}>
                 {b.label}
@@ -198,9 +198,9 @@ export default function NewJobForm() {
           disabled={submitting}
           className="btn-primary w-full disabled:opacity-50 disabled:pointer-events-none"
         >
-          {submitting ? "Sinusave..." : "I-POST ANG JOB"}
+          {submitting ? "Saving..." : "POST JOB"}
         </button>
       </form>
-    </main>
+    </>
   );
 }

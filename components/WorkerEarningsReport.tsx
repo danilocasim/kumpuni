@@ -18,7 +18,7 @@ export default function WorkerEarningsReport({
   const handleSave = async () => {
     const num = amount.trim() === "" ? null : parseInt(amount.trim(), 10);
     if (num != null && (Number.isNaN(num) || num < 0)) {
-      setError("Ilagay ang halaga sa PHP (numero lang).");
+      setError("Enter amount in PHP (numbers only).");
       return;
     }
     setError("");
@@ -30,7 +30,7 @@ export default function WorkerEarningsReport({
         .update({ worker_reported_amount: num })
         .eq("id", jobId);
       if (updateErr) {
-        setError(updateErr.message || "Hindi masave. Subukan muli.");
+        setError(updateErr.message || "Could not save. Try again.");
         return;
       }
       setSaved(true);
@@ -42,7 +42,7 @@ export default function WorkerEarningsReport({
   return (
     <div className="mt-4 card-kumpuni p-4">
       <p className="text-caption font-medium text-slate-text mb-2">
-        I-report ang kita (para sa records mo lang, opsyonal)
+        Report earnings (for your records only, optional)
       </p>
       <div className="flex gap-2 items-end">
         <div className="flex-1">
@@ -65,7 +65,7 @@ export default function WorkerEarningsReport({
           disabled={saving}
           className="btn-secondary py-2"
         >
-          {saving ? "Sinusave..." : saved ? "Na-save" : "I-save"}
+          {saving ? "Saving..." : saved ? "Saved" : "Save"}
         </button>
       </div>
       {error && (

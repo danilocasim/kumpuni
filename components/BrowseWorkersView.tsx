@@ -22,6 +22,7 @@ export default function BrowseWorkersView({
 }) {
   const [minRating, setMinRating] = useState(initialMinRating);
   const [workers, setWorkers] = useState<BrowseWorker[]>([]);
+  const [jobLocation, setJobLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedWorker, setSelectedWorker] = useState<BrowseWorker | null>(null);
@@ -37,13 +38,25 @@ export default function BrowseWorkersView({
       const data = await res.json();
       if (res.ok) {
         setWorkers(data.workers ?? []);
+        if (
+          data.job_lat != null &&
+          data.job_lng != null &&
+          Number.isFinite(data.job_lat) &&
+          Number.isFinite(data.job_lng)
+        ) {
+          setJobLocation({ lat: data.job_lat, lng: data.job_lng });
+        } else {
+          setJobLocation(null);
+        }
       } else {
         setWorkers([]);
-        setError(data.error || "Hindi ma-load ang listahan. Subukan mag-log in muli.");
+        setJobLocation(null);
+        setError(data.error || "Could not load list. Try logging in again.");
       }
     } catch {
       setWorkers([]);
-      setError("May nangyaring error. Subukan muli o mag-refresh.");
+      setJobLocation(null);
+        setError("Something went wrong. Try again or refresh.");
     } finally {
       setLoading(false);
     }
@@ -77,46 +90,54 @@ export default function BrowseWorkersView({
   });
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label htmlFor="min-rating" className="label-kumpuni">
-          Minimum rating
-        </label>
-        <select
-          id="min-rating"
-          value={minRating}
-          onChange={(e) => setMinRating(parseFloat(e.target.value))}
-          className="input-kumpuni"
-        >
-          {MIN_RATINGS.map((r) => (
-            <option key={r} value={r}>
-              {r === 0 ? "Any (walang minimum)" : `${r.toFixed(1)} star${r !== 1 ? "s" : ""}`}
-            </option>
-          ))}
-        </select>
+    <div className="space-y-4 lg:grid lg:grid-cols-[3fr_2fr] lg:gap-8 lg:items-start">
+      {/* Left: map (60% on desktop) */}
+      <div className="lg:space-y-4">
+        <div className="card-kumpuni overflow-hidden !p-2">
+          <p className="text-caption text-slate-text mb-2 px-2">
+            Worker locations (approximate)
+            {workers.length > 0 && (
+              <span className="ml-1 text-muted-gray">
+                — {mapWorkers.filter((w) => w.service_lat != null && w.service_lng != null).length} on map
+              </span>
+            )}
+          </p>
+          <div className="h-64 lg:min-h-[400px]">
+            <BrowseWorkersMap
+              workers={mapWorkers}
+              jobLocation={jobLocation}
+              onSelectWorker={(id) => {
+                const w = workers.find((x) => x.worker_id === id);
+                if (w) setSelectedWorker(w);
+              }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="card-kumpuni overflow-hidden p-2">
-        <p className="text-caption text-slate-text mb-2">
-          Lokasyon ng workers (approximate)
-          {workers.length > 0 && (
-            <span className="ml-1 text-muted-gray">
-              — {mapWorkers.filter((w) => w.service_lat != null && w.service_lng != null).length} sa map
-            </span>
-          )}
-        </p>
-        <BrowseWorkersMap
-          workers={mapWorkers}
-          onSelectWorker={(id) => {
-            const w = workers.find((x) => x.worker_id === id);
-            if (w) setSelectedWorker(w);
-          }}
-        />
-      </div>
+      {/* Right: filters + list (40% on desktop) */}
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="min-rating" className="label-kumpuni">
+            Minimum rating
+          </label>
+          <select
+            id="min-rating"
+            value={minRating}
+            onChange={(e) => setMinRating(parseFloat(e.target.value))}
+            className="input-kumpuni"
+          >
+            {MIN_RATINGS.map((r) => (
+              <option key={r} value={r}>
+                {r === 0 ? "Any (no minimum)" : `${r.toFixed(1)} star${r !== 1 ? "s" : ""}`}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <h2 className="font-heading text-[15px] font-bold text-slate-text">
-        Mga worker
-      </h2>
+        <h2 className="font-display text-[20px] lg:text-[22px] font-bold text-slate-text">
+          Workers
+        </h2>
       {error && (
         <div className="card-kumpuni border-danger-red/30 bg-orange-light/50 p-3 text-body text-slate-text">
           {error}
@@ -125,7 +146,7 @@ export default function BrowseWorkersView({
             onClick={() => fetchWorkers()}
             className="btn-ghost mt-2"
           >
-            Subukan muli
+            Try again
           </button>
         </div>
       )}
@@ -145,11 +166,10 @@ export default function BrowseWorkersView({
       ) : error ? null : workers.length === 0 ? (
         <div className="card-kumpuni p-4 space-y-1">
           <p className="font-medium text-slate-text">
-            Walang worker na nag-match sa filter ngayon.
+            No workers match the current filters.
           </p>
           <p className="text-caption text-muted-gray">
-            Subukan ibababa ang minimum rating (dropdown sa taas), o maghintay —
-            may workers na magre-register na malapit sa area mo.
+            Try lowering the minimum rating (dropdown above), or wait — workers may register near your area.
           </p>
         </div>
       ) : (
@@ -178,8 +198,9 @@ export default function BrowseWorkersView({
       )}
 
       <Link href={`/jobs/${jobId}`} className="btn-ghost text-caption mt-4 inline-block">
-        Balik sa job detail
+        Back to job detail
       </Link>
+      </div>
     </div>
   );
 }

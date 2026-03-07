@@ -31,10 +31,24 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle noise overlay - very low opacity for texture only */
+/* Subtle noise overlay - 0.03 opacity (barely visible, subconsciously felt) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
 .page-bg {
   background-color: var(--concrete-white);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* Leaflet map container */
@@ -70,53 +84,77 @@ body {
   }
 }
 
-/* --- Component layer: buttons --- */
+  /* --- Component layer: buttons --- */
 @layer components {
   .btn-primary {
-    @apply min-h-[48px] px-4 rounded-kumpuni-sm font-heading font-bold text-base uppercase tracking-wide;
-    background-color: var(--action-orange);
+    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-[6px] font-body font-bold text-[15px] uppercase tracking-wider text-center;
+    background-color: #E8722A;
     color: white;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.1s ease, filter 0.1s ease;
+    box-shadow: 0 2px 4px rgba(232, 114, 42, 0.3);
+    transition: transform 0.1s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   }
   .btn-primary:hover {
-    filter: brightness(0.95);
+    background-color: #D4651F;
+    box-shadow: 0 3px 6px rgba(232, 114, 42, 0.35);
   }
   .btn-primary:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
+  }
+  @media (min-width: 1024px) {
+    .btn-primary {
+      min-width: 200px;
+      width: auto;
+    }
   }
 
   .btn-secondary {
-    @apply min-h-[48px] px-4 rounded-kumpuni-sm font-heading font-bold text-base border-2 bg-transparent;
-    color: var(--kumpuni-blue);
-    border-color: var(--kumpuni-blue);
+    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-[6px] font-body font-semibold text-[15px] bg-transparent text-center;
+    color: #1B4A6B;
+    border: 1.5px solid #1B4A6B;
     transition: background-color 0.15s ease, transform 0.1s ease;
   }
   .btn-secondary:hover {
     background-color: var(--blue-light);
   }
   .btn-secondary:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
 
   .btn-ghost {
     @apply font-medium text-kumpuni-blue underline-offset-2 hover:underline;
   }
 
-  /* Cards: white on concrete, warm border, subtle shadow */
+  /* Cards: white, warm border #E8E4DF, 10px radius, shadow, hover on desktop */
   .card-kumpuni {
     background: #FFFFFF;
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid #E8E4DF;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(27, 74, 107, 0.08);
+    padding: 16px;
+    transition: box-shadow 0.2s;
   }
-  .card-kumpuni:hover {
-    box-shadow: var(--shadow-md);
+  @media (min-width: 1024px) {
+    .card-kumpuni {
+      padding: 20px;
+    }
+    .card-kumpuni:hover {
+      box-shadow: 0 4px 12px rgba(27, 74, 107, 0.12);
+    }
   }
 
-  /* Status badges: compact pill, dot + text */
+  /* Left border accent by status (add with card-kumpuni) */
+  .card-accent-asap { border-left: 3px solid #E8722A; }
+  .card-accent-this-week { border-left: 3px solid #1B4A6B; }
+  .card-accent-flexible { border-left: 3px solid #9B9B9B; }
+  .card-accent-open { border-left: 3px solid #1B4A6B; }
+  .card-accent-completed { border-left: 3px solid #2D8B4E; }
+  .card-accent-cancelled { border-left: 3px solid #C0392B; }
+  .card-accent-available { border-left: 3px solid #2D8B4E; }
+  .card-accent-not-available { border-left: 3px solid #9B9B9B; }
+
+  /* Status badges: rounded-[4px], dot + text, DM Sans 11px 700 */
   .badge-status {
-    @apply inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide;
+    @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider font-body;
   }
   .badge-asap { background: var(--orange-light); color: var(--action-orange); }
   .badge-this-week { background: var(--blue-light); color: var(--kumpuni-blue); }

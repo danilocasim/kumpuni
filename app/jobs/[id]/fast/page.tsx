@@ -24,9 +24,9 @@ export default async function JobFastPage({
   if (jobErr || !job) {
     return (
       <main className="min-h-screen p-4">
-        <p className="text-red-600">Job hindi mahanap.</p>
+        <p className="text-red-600">Job not found.</p>
         <Link href="/dashboard" className="mt-2 inline-block text-blue-600 underline">
-          Balik sa dashboard
+          Back to dashboard
         </Link>
       </main>
     );
@@ -57,7 +57,7 @@ export default async function JobFastPage({
 
   return (
     <main className="min-h-screen p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold mb-4">Fast Match — mga interested workers</h1>
+      <h1 className="text-xl font-bold mb-4">Fast Match — interested workers</h1>
       <JobFastMatch
         jobId={id}
         initialJob={initialJob}
@@ -68,7 +68,7 @@ export default async function JobFastPage({
           href={`/jobs/${id}`}
           className="text-blue-600 underline"
         >
-          Tingnan ang job detail
+          View job detail
         </Link>
       </div>
     </main>

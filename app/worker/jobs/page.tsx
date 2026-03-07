@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { PageContainer } from "@/components/PageContainer";
 
 const CATEGORY_LABELS: Record<string, string> = {
   plumbing: "Plumbing",
@@ -30,9 +31,11 @@ export default async function WorkerJobsPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen p-4">
-        <p className="text-red-600">May error sa pag-load. Subukan muli.</p>
-        <p className="text-xs text-gray-500 mt-1">Siguraduhing kumpleto ang profile mo (skills at service area).</p>
+      <main className="min-h-screen page-bg pt-6">
+        <PageContainer>
+          <p className="text-danger-red text-body">Error loading. Try again.</p>
+          <p className="text-caption text-muted-gray mt-1">Siguraduhing kumpleto ang profile mo (skills at service area).</p>
+        </PageContainer>
       </main>
     );
   }
@@ -51,13 +54,16 @@ export default async function WorkerJobsPage() {
   }>;
 
   return (
-    <main className="min-h-screen p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold mb-4">Mga available na job</h1>
+    <main className="min-h-screen page-bg pt-6 pb-6">
+      <PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-4 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+        Available jobs
+      </h1>
       <p className="text-sm text-gray-600 mb-4">
         Jobs na match sa skills mo at malapit sa service area mo.
       </p>
       {!list.length ? (
-        <p className="text-gray-600">Wala pang open jobs ngayon na malapit sa area mo. Subukan mamaya.</p>
+        <p className="text-gray-600">No open jobs near your area right now. Try again later.</p>
       ) : (
         <ul className="space-y-3">
           {list.map((job) => (
@@ -93,6 +99,7 @@ export default async function WorkerJobsPage() {
           ))}
         </ul>
       )}
+      </PageContainer>
     </main>
   );
 }

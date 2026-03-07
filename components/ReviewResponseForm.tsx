@@ -29,7 +29,7 @@ export default function ReviewResponseForm({
         .update({ response: trimmed || null })
         .eq("id", reviewId);
       if (updateErr) {
-        setError(updateErr.message || "Hindi masave. Subukan muli.");
+        setError(updateErr.message || "Could not save. Try again.");
         return;
       }
       setResponse(trimmed);
@@ -60,7 +60,7 @@ export default function ReviewResponseForm({
           disabled={saving || !response.trim()}
           className="btn-secondary mt-2 text-sm py-2 disabled:opacity-50"
         >
-          {saving ? "Sinusave..." : saved ? "Na-save" : "I-save ang response"}
+          {saving ? "Saving..." : saved ? "Saved" : "Save response"}
         </button>
       )}
       {error && (

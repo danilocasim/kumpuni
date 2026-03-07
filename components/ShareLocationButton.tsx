@@ -9,7 +9,7 @@ export default function ShareLocationButton() {
   async function handleShare() {
     if (!navigator.geolocation) {
       setStatus("error");
-      setMessage("Hindi supported ng browser ang location.");
+      setMessage("Location is not supported by your browser.");
       return;
     }
     setStatus("loading");
@@ -30,16 +30,16 @@ export default function ShareLocationButton() {
             setMessage("Na-update ang lokasyon mo. Makikita ka ng homeowners sa map.");
           } else {
             setStatus("error");
-            setMessage(data.error || "Hindi masave ang lokasyon.");
+            setMessage(data.error || "Could not save location.");
           }
         } catch {
           setStatus("error");
-          setMessage("May nangyaring error. Subukan muli.");
+          setMessage("Something went wrong. Try again.");
         }
       },
       () => {
         setStatus("error");
-        setMessage("Walang lokasyon o na-deny ang permission. I-on ang Location sa device mo.");
+        setMessage("No location or permission denied. Turn on Location on your device.");
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );

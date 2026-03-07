@@ -1,7 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import dynamic from "next/dynamic";
+
+const LEAFLET_MARKER_ICON = {
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+};
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -48,6 +54,16 @@ export function ServiceAreaPicker({
   const [radiusKm, setRadiusKm] = useState(value?.radius_km ?? 10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    import("leaflet").then((L) => {
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+      L.Icon.Default.mergeOptions(LEAFLET_MARKER_ICON);
+      setMapReady(true);
+    });
+  }, []);
 
   const syncToParent = useCallback(
     (lat: number, lng: number, km: number) => {
@@ -60,7 +76,7 @@ export function ServiceAreaPicker({
     setLoading(true);
     setError(null);
     if (!navigator.geolocation) {
-      setError("Hindi supported ang geolocation.");
+      setError("Geolocation is not supported.");
       setLoading(false);
       return;
     }
@@ -73,7 +89,7 @@ export function ServiceAreaPicker({
         setLoading(false);
       },
       () => {
-        setError("Hindi makuha ang lokasyon.");
+        setError("Could not get location.");
         setLoading(false);
       }
     );
@@ -113,12 +129,12 @@ export function ServiceAreaPicker({
           disabled={loading}
           className="min-h-touch px-3 rounded border border-gray-300 bg-gray-50 text-sm disabled:opacity-50"
         >
-          {loading ? "Kumukuha..." : "Gamitin ang current location"}
+          {loading ? "Getting..." : "Use current location"}
         </button>
       </div>
       {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
       <label className="block text-sm font-medium mb-1">
-        Radius ng service area (km): {radiusKm}
+        Service area radius (km): {radiusKm}
       </label>
       <input
         type="range"
@@ -129,26 +145,32 @@ export function ServiceAreaPicker({
         className="w-full h-2 rounded accent-blue-600"
       />
       <div className="h-64 rounded border border-gray-300 overflow-hidden bg-gray-100 mt-2">
-        <MapContainer
-          center={center}
-          zoom={DEFAULT_ZOOM}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker position={center} draggable eventHandlers={{ dragend: handleDragEnd }} />
-          <Circle
+        {!mapReady ? (
+          <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
+            Loading map...
+          </div>
+        ) : (
+          <MapContainer
             center={center}
-            radius={radiusKm * 1000}
-            pathOptions={{ color: "#2563eb", fillColor: "#3b82f6", fillOpacity: 0.15, weight: 2 }}
-          />
-        </MapContainer>
+            zoom={DEFAULT_ZOOM}
+            style={{ height: "100%", width: "100%" }}
+            scrollWheelZoom
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={center} draggable eventHandlers={{ dragend: handleDragEnd }} />
+            <Circle
+              center={center}
+              radius={radiusKm * 1000}
+              pathOptions={{ color: "#2563eb", fillColor: "#3b82f6", fillOpacity: 0.15, weight: 2 }}
+            />
+          </MapContainer>
+        )}
       </div>
       <p className="text-xs text-gray-500 mt-1">
-        I-drag ang marker para ilagay ang center ng service area. I-adjust ang radius sa slider.
+        Drag the marker to set the center of your service area. Adjust the radius with the slider.
       </p>
     </div>
   );

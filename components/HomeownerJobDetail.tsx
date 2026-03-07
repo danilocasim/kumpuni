@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { PageContainer } from "@/components/PageContainer";
 
 const STATUS_LABELS: Record<string, string> = {
   open: "Bukas",
@@ -87,7 +88,7 @@ export default function HomeownerJobDetail({
       });
       const data = await res.json();
       if (!res.ok) {
-        setCancelError(data.error || "Hindi ma-cancel. Subukan muli.");
+        setCancelError(data.error || "Could not cancel. Try again.");
         return;
       }
       setJob((prev) => ({ ...prev, status: "cancelled" }));
@@ -108,8 +109,9 @@ export default function HomeownerJobDetail({
   const cancelledAfterIndex = isCancelled ? 1 : -1; // cancelled after "matched" or from "open"
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-[480px] mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-6">
+    <main className="min-h-screen page-bg pt-6 pb-6">
+      <PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-6 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
         Job detail
       </h1>
 
@@ -168,20 +170,30 @@ export default function HomeownerJobDetail({
       {isOpen && (
         <div className="space-y-3 mb-6">
           {isFlexible && (
-            <Link
-              href={`/jobs/${jobId}/browse`}
-              className="btn-primary block w-full text-center"
-            >
-              Browse workers — makita ang list at map, i-contact ang worker
-            </Link>
+            <div>
+              <p className="text-caption text-muted-gray mb-2">
+                View the list and map of workers, then contact a worker.
+              </p>
+              <Link
+                href={`/jobs/${jobId}/browse`}
+                className="btn-primary block w-full text-center"
+              >
+                TINGNAN ANG MGA WORKER
+              </Link>
+            </div>
           )}
           {isFast && (
-            <Link
-              href={`/jobs/${jobId}/fast`}
-              className="btn-primary block w-full text-center bg-amber-600 hover:bg-amber-700"
-            >
-              Tingnan ang Fast Match — live list ng interested workers
-            </Link>
+            <div>
+              <p className="text-caption text-muted-gray mb-2">
+                Live list ng interested workers.
+              </p>
+              <Link
+                href={`/jobs/${jobId}/fast`}
+                className="btn-primary block w-full text-center"
+              >
+                View Fast Match
+              </Link>
+            </div>
           )}
         </div>
       )}
@@ -189,7 +201,7 @@ export default function HomeownerJobDetail({
       {isCompleted && (
         <div className="card-kumpuni p-4 mb-6 border-verified-green/30 bg-green-light/30">
           <p className="text-body text-slate-text mb-3">
-            Na-complete na ang job. Pwede mo nang i-confirm at mag-iwan ng review.
+            Job is complete. You can confirm and leave a review.
           </p>
           <Link
             href={`/jobs/${jobId}/review`}
@@ -213,14 +225,15 @@ export default function HomeownerJobDetail({
             disabled={cancelling}
             className="w-full min-h-[48px] rounded-kumpuni-sm border-2 border-danger-red text-danger-red font-heading font-bold text-base bg-white hover:bg-red-50 disabled:opacity-50"
           >
-            {cancelling ? "Sinusave..." : "I-cancel ang job"}
+            {cancelling ? "Saving..." : "Cancel job"}
           </button>
         </div>
       )}
 
       <Link href="/dashboard" className="btn-ghost text-caption">
-        ← Balik sa Mga Job ko
+        ← Back to My Jobs
       </Link>
+      </PageContainer>
     </main>
   );
 }

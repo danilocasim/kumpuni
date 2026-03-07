@@ -1,9 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapChangeView } from "@/components/MapChangeView";
 import { MapClickHandler } from "@/components/MapClickHandler";
+import type { Marker as LeafletMarker } from "leaflet";
+
+const LEAFLET_MARKER_ICON = {
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+};
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -28,16 +35,16 @@ const METRO_MANILA_BARANGAYS = [
   "Holy Spirit",
   "Novaliches",
   "Project 4",
-  "Quezon City (pili)",
+  "Quezon City (select)",
   "San Antonio",
   "Sikatuna Village",
   "Ugong Norte",
   "Kapitolyo",
   "Ortigas",
-  "Pasig (pili)",
+  "Pasig (select)",
   "San Miguel",
   "Sagad",
-  "Iba pa (manual)",
+  "Other (manual)",
 ];
 
 export interface LocationValue {
@@ -59,10 +66,22 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
   const [barangay, setBarangay] = useState(value?.barangay ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const markerRef = useRef<LeafletMarker | null>(null);
+
+  // Fix default Leaflet marker icon (broken in Next.js); run before first map paint
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    import("leaflet").then((L) => {
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
+      L.Icon.Default.mergeOptions(LEAFLET_MARKER_ICON);
+      setMapReady(true);
+    });
+  }, []);
 
   const handleLocation = useCallback(
     (lat: number, lng: number) => {
-      onChange({ lat, lng, barangay: barangay || "Iba pa (manual)" });
+      onChange({ lat, lng, barangay: barangay || "Other (manual)" });
     },
     [barangay, onChange]
   );
@@ -70,7 +89,7 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       setCenter([lat, lng]);
-      onChange({ lat, lng, barangay: barangay || "Iba pa (manual)" });
+      onChange({ lat, lng, barangay: barangay || "Other (manual)" });
     },
     [barangay, onChange]
   );
@@ -88,7 +107,7 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
     setLoading(true);
     setError(null);
     if (!navigator.geolocation) {
-      setError("Hindi supported ang geolocation sa device mo.");
+      setError("Geolocation is not supported on your device.");
       setLoading(false);
       return;
     }
@@ -97,14 +116,14 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setCenter([lat, lng]);
-        onChange({ lat, lng, barangay: barangay || "Iba pa (manual)" });
+        onChange({ lat, lng, barangay: barangay || "Other (manual)" });
         setLoading(false);
       },
       (err) => {
         setError(
           err?.code === 1
-            ? "Na-deny ang location permission. Piliin na lang sa mapa o barangay."
-            : "Hindi makuha ang lokasyon. Subukan muli o piliin sa mapa o barangay."
+            ? "Location permission denied. Pick a spot on the map or choose a barangay."
+            : "Could not get location. Try again or pick on the map or choose a barangay."
         );
         setLoading(false);
       }
@@ -118,6 +137,13 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
     }
   }, [value?.lat, value?.lng, value?.barangay]);
 
+  // Keep the Leaflet marker in sync when center changes (e.g. "Use current location" or value from parent)
+  useEffect(() => {
+    if (markerRef.current) {
+      markerRef.current.setLatLng(center);
+    }
+  }, [center[0], center[1]]);
+
   return (
     <div className={className}>
       <div className="flex gap-2 mb-2">
@@ -127,17 +153,17 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
           disabled={loading}
           className="min-h-touch px-3 rounded border border-gray-300 bg-gray-50 text-sm disabled:opacity-50"
         >
-          {loading ? "Kumukuha..." : "Gamitin ang current location"}
+          {loading ? "Getting..." : "Use current location"}
         </button>
       </div>
       {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-      <label className="block text-sm font-medium mb-1">Barangay (opsyonal, pili sa list)</label>
+      <label className="block text-sm font-medium mb-1">Barangay (optional, select from list)</label>
       <select
         value={barangay}
         onChange={handleBarangayChange}
         className="w-full min-h-touch px-3 rounded border border-gray-300 mb-2"
       >
-        <option value="">Piliin ang barangay...</option>
+        <option value="">Select barangay...</option>
         {METRO_MANILA_BARANGAYS.map((b) => (
           <option key={b} value={b}>
             {b}
@@ -145,35 +171,41 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
         ))}
       </select>
       <div className="h-64 rounded border border-gray-300 overflow-hidden bg-gray-100">
-        <MapContainer
-          center={center}
-          zoom={DEFAULT_ZOOM}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker
-            key={`marker-${center[0]}-${center[1]}`}
-            position={center}
-            draggable
-            eventHandlers={{
-              dragend(e) {
-                const marker = e.target;
-                const { lat, lng } = marker.getLatLng();
-                setCenter([lat, lng]);
-                onChange({ lat, lng, barangay: barangay || "Iba pa (manual)" });
-              },
-            }}
-          />
-          <MapChangeView center={center} zoom={DEFAULT_ZOOM} />
-          <MapClickHandler onMapClick={handleMapClick} />
-        </MapContainer>
+        {!mapReady ? (
+          <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
+            Loading map...
+          </div>
+        ) : (
+          <MapContainer
+            center={center}
+            zoom={DEFAULT_ZOOM}
+            style={{ height: "100%", width: "100%" }}
+            scrollWheelZoom
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker
+              ref={markerRef}
+              position={[center[0], center[1]]}
+              draggable
+              eventHandlers={{
+                dragend(e) {
+                  const marker = e.target;
+                  const { lat, lng } = marker.getLatLng();
+                  setCenter([lat, lng]);
+                  onChange({ lat, lng, barangay: barangay || "Other (manual)" });
+                },
+              }}
+            />
+            <MapChangeView center={center} zoom={DEFAULT_ZOOM} />
+            <MapClickHandler onMapClick={handleMapClick} />
+          </MapContainer>
+        )}
       </div>
       <p className="text-xs text-gray-500 mt-1">
-        I-drag ang marker o i-click sa mapa para ilagay ang lokasyon. Pwede rin pumili ng barangay sa taas.
+        Drag the marker or click the map to set location. You can also pick a barangay above.
       </p>
     </div>
   );

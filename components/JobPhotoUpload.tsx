@@ -50,7 +50,7 @@ export function JobPhotoUpload({ value, onChange, className = "" }: JobPhotoUplo
         onChange([...value, ...newItems].slice(0, MAX_FILES));
       } catch (err) {
         console.error(err);
-        setError("Hindi ma-compress ang larawan. Subukan muli.");
+        setError("Could not compress image. Try again.");
       } finally {
         setCompressing(false);
         e.target.value = "";
@@ -69,7 +69,7 @@ export function JobPhotoUpload({ value, onChange, className = "" }: JobPhotoUplo
   return (
     <div className={className}>
       <label className="label-kumpuni">
-        Mga litrato (max {MAX_FILES}, bawat isa &lt;500KB)
+        Photos (max {MAX_FILES}, each &lt;500KB)
       </label>
       <div className="flex flex-wrap gap-2 mb-2">
         {value.map((item, i) => (
@@ -101,7 +101,7 @@ export function JobPhotoUpload({ value, onChange, className = "" }: JobPhotoUplo
             className="sr-only"
           />
           <span className="text-2xl">+</span>
-          {compressing ? "Nagco-compress..." : "Mag-upload"}
+          {compressing ? "Compressing..." : "Upload"}
         </label>
       )}
       {error && (

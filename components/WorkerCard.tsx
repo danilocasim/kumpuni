@@ -23,10 +23,10 @@ const AVAILABILITY_LABELS: Record<string, string> = {
 function availabilityBorderClass(availability: string): string {
   switch (availability) {
     case "available_now":
+    case "open_anytime":
       return "border-l-[3px] border-l-verified-green";
     case "this_week":
     case "weekends":
-    case "open_anytime":
       return "border-l-[3px] border-l-kumpuni-blue";
     default:
       return "border-l-[3px] border-l-muted-gray";
@@ -36,10 +36,10 @@ function availabilityBorderClass(availability: string): string {
 function availabilityBadgeClass(availability: string): string {
   switch (availability) {
     case "available_now":
+    case "open_anytime":
       return "badge-status badge-available";
     case "this_week":
     case "weekends":
-    case "open_anytime":
       return "badge-status badge-this-week";
     default:
       return "badge-status badge-not-available";
@@ -80,7 +80,7 @@ export function WorkerCard({
         ? `₱${worker.rate_min}/araw`
         : "—";
 
-  const cardClass = `card-kumpuni flex w-full items-start gap-3 p-3 transition-shadow ${availabilityBorderClass(worker.availability)}`;
+  const cardClass = `card-kumpuni flex w-full items-start gap-3 transition-shadow ${availabilityBorderClass(worker.availability)}`;
 
   const content = (
     <>

@@ -86,7 +86,7 @@ export default function WorkerJobPageClient({
       });
       const data = await res.json();
       if (!res.ok) {
-        setCancelError(data.error || "Hindi ma-cancel. Subukan muli.");
+        setCancelError(data.error || "Could not cancel. Try again.");
         return;
       }
       setJob((prev) => ({ ...prev, status: "cancelled" }));
@@ -163,7 +163,7 @@ export default function WorkerJobPageClient({
             disabled={cancelling}
             className="w-full min-h-[48px] rounded-kumpuni-sm border-2 border-danger-red text-danger-red font-heading font-bold text-base bg-white hover:bg-red-50 disabled:opacity-50"
           >
-            {cancelling ? "Sinusave..." : "I-cancel (huwag na tumuloy)"}
+            {cancelling ? "Saving..." : "Cancel (don't proceed)"}
           </button>
         </div>
       )}
@@ -185,7 +185,7 @@ export default function WorkerJobPageClient({
               href={`/jobs/${jobId}/review`}
               className="btn-primary inline-flex w-full justify-center"
             >
-              Mag-iwan ng review
+              Leave a review
             </Link>
           </div>
           <WorkerEarningsReport
@@ -203,7 +203,7 @@ export default function WorkerJobPageClient({
 
       <div className="mt-6">
         <Link href="/worker/jobs" className="btn-ghost text-caption">
-          Balik sa job list
+          Back to job list
         </Link>
       </div>
     </main>

@@ -27,7 +27,7 @@ export default function WorkerJobStatusActions({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Hindi masave. Subukan muli.");
+        setError(data.error || "Could not save. Try again.");
         return;
       }
       setStatus(newStatus);
@@ -57,7 +57,7 @@ export default function WorkerJobStatusActions({
             onClick={() => updateStatus("in_progress")}
             className="min-h-touch rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {loading ? "Sinusave..." : "On My Way"}
+            {loading ? "Saving..." : "On My Way"}
           </button>
         )}
         {status === "in_progress" && (
@@ -67,7 +67,7 @@ export default function WorkerJobStatusActions({
             onClick={() => updateStatus("completed")}
             className="min-h-touch rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {loading ? "Sinusave..." : "Mark as Completed"}
+            {loading ? "Saving..." : "Mark as Completed"}
           </button>
         )}
       </div>

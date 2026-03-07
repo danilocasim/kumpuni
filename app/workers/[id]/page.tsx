@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPublicWorkerProfile } from "@/lib/get-public-worker-profile";
 import WorkerProfileMap from "@/components/WorkerProfileMap";
 import ReviewResponseForm from "@/components/ReviewResponseForm";
+import { PageContainer } from "@/components/PageContainer";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 
 const SKILL_LABELS: Record<string, string> = {
@@ -58,8 +59,8 @@ export default async function PublicWorkerProfilePage({
   });
 
   return (
-    <main className="min-h-screen max-w-[480px] mx-auto pb-24 page-bg">
-      {/* Header: kumpuni-blue with subtle stripe, photo, name, verified, member since */}
+    <main className="min-h-screen pb-24 page-bg">
+      {/* Header: full-width, kumpuni-blue */}
       <header
         className="relative bg-kumpuni-blue px-4 pt-6 pb-8"
         style={{
@@ -72,7 +73,7 @@ export default async function PublicWorkerProfilePage({
           className="inline-flex items-center gap-1 text-sm font-medium text-white/90 hover:text-white mb-4"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-          Balik sa home
+          Back to home
         </Link>
         <div className="flex gap-4 items-start">
           <div className="h-20 w-20 flex-shrink-0 rounded-full border-2 border-white overflow-hidden bg-concrete-white">
@@ -108,42 +109,43 @@ export default async function PublicWorkerProfilePage({
         </div>
       </header>
 
-      <div className="px-4 -mt-4">
-        {/* Stats row */}
-        <div className="card-kumpuni grid grid-cols-3 divide-x divide-card-border p-4">
-          <div className="text-center">
-            <p className="font-mono text-lg font-semibold text-slate-text">
+      <PageContainer className="-mt-4">
+      <div>
+        {/* Stats row: clear labels, consistent alignment */}
+        <div className="card-kumpuni grid grid-cols-3 divide-x divide-[#E8E4DF] p-5">
+          <div className="text-center px-2">
+            <p className="font-display text-xl font-bold text-slate-text tabular-nums">
               {profile.total_jobs}
             </p>
-            <p className="text-caption text-muted-gray">Trabaho</p>
+            <p className="text-[12px] font-medium text-muted-gray mt-0.5 uppercase tracking-wider">Jobs</p>
           </div>
-          <div className="text-center">
-            <p className="font-mono text-lg font-semibold text-wood-brown">
+          <div className="text-center px-2">
+            <p className="font-display text-xl font-bold text-wood-brown tabular-nums">
               ★ {Number(profile.avg_rating).toFixed(1)}
             </p>
-            <p className="text-caption text-muted-gray">Rating</p>
+            <p className="text-[12px] font-medium text-muted-gray mt-0.5 uppercase tracking-wider">Rating</p>
           </div>
-          <div className="text-center">
-            <p className="font-mono text-sm font-semibold text-slate-text">
-              ₱{profile.rate_min ?? "?"}–₱{profile.rate_max ?? "?"}
+          <div className="text-center px-2">
+            <p className="font-display text-base font-bold text-slate-text tabular-nums">
+              ₱{profile.rate_min != null ? profile.rate_min.toLocaleString() : "?"}–₱{profile.rate_max != null ? profile.rate_max.toLocaleString() : "?"}
             </p>
-            <p className="text-caption text-muted-gray">/araw</p>
+            <p className="text-[12px] font-medium text-muted-gray mt-0.5">per day</p>
           </div>
         </div>
 
         {/* Availability */}
-        <p className="label-kumpuni mt-4">Availability</p>
-        <span className={availabilityBadgeClass(profile.availability)}>
-          <span className="badge-dot" />
-          {AVAILABILITY_LABELS[profile.availability] ?? profile.availability}
-        </span>
+        <div className="mt-6">
+          <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Availability</h2>
+          <span className={availabilityBadgeClass(profile.availability)}>
+            <span className="badge-dot" />
+            {AVAILABILITY_LABELS[profile.availability] ?? profile.availability}
+          </span>
+        </div>
 
         {/* Skills */}
         {skills.length > 0 && (
           <div className="mt-6">
-            <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-              Skills
-            </h2>
+            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Skills</h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((s) => (
                 <span
@@ -159,19 +161,15 @@ export default async function PublicWorkerProfilePage({
 
         {profile.bio && (
           <div className="mt-6">
-            <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-              Tungkol
-            </h2>
-            <p className="text-body text-slate-text">{profile.bio}</p>
+            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">About</h2>
+            <p className="text-body text-slate-text leading-relaxed">{profile.bio}</p>
           </div>
         )}
 
         {/* Portfolio */}
         {(profile.portfolio_urls ?? []).length > 0 && (
           <div className="mt-6">
-            <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-              Portfolio
-            </h2>
+            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Portfolio</h2>
             <div className="grid grid-cols-2 gap-2">
               {profile.portfolio_urls.map((url: string, i: number) => (
                 <a
@@ -196,9 +194,7 @@ export default async function PublicWorkerProfilePage({
         {/* Map */}
         {profile.service_lat != null && profile.service_lng != null && (
           <div className="mt-6">
-            <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-              Service area (approximate)
-            </h2>
+            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Service area (approximate)</h2>
             <div className="overflow-hidden rounded-kumpuni-md border border-card-border">
               <WorkerProfileMap
                 lat={profile.service_lat}
@@ -211,11 +207,9 @@ export default async function PublicWorkerProfilePage({
 
         {/* Reviews */}
         <div className="mt-6">
-          <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-            Mga review
-          </h2>
+          <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Reviews</h2>
           {recent_reviews.length === 0 ? (
-            <p className="text-body text-muted-gray">Walang reviews.</p>
+            <p className="text-body text-muted-gray">No reviews yet.</p>
           ) : (
             <ul className="space-y-4">
               {recent_reviews.map(
@@ -259,7 +253,7 @@ export default async function PublicWorkerProfilePage({
                     )}
                     {r.response && (
                       <p className="text-body text-slate-text mt-2 pl-2 border-l-2 border-muted-gray/30 italic">
-                        Sagot: {r.response}
+                        Response: {r.response}
                       </p>
                     )}
                     {currentUser?.id === id && !r.response && (
@@ -275,32 +269,30 @@ export default async function PublicWorkerProfilePage({
           )}
         </div>
 
-        {/* Contact CTA text */}
-        <div className="mt-6 text-body text-slate-text">
+        {/* Contact CTA: clear instruction */}
+        <div className="mt-8 p-4 rounded-kumpuni-sm bg-blue-light/40 border border-kumpuni-blue/20">
           {isLoggedIn ? (
-            <p>
-              Para makipag-ugnayan, mag-post ng job at hanapin ang worker na ito
-              sa &quot;Tingnan ang workers&quot; — doon mo makikita ang contact
-              number.
+            <p className="text-[14px] text-slate-text leading-relaxed">
+              To contact this worker, post a job and choose them from the Browse workers list — their number will appear there.
             </p>
           ) : (
-            <p>
-              <Link href={`/login?next=/workers/${id}`} className="btn-ghost">
-                Mag-log in
-              </Link>{" "}
-              para makita kung paano makipag-ugnayan (mag-post ng job, tapos
-              piliin ang worker sa listahan).
+            <p className="text-[14px] text-slate-text leading-relaxed">
+              <Link href={`/login?next=/workers/${id}`} className="font-semibold text-kumpuni-blue hover:underline">
+                Log in
+              </Link>
+              {" "}to post a job and get this worker&apos;s contact number from the list.
             </p>
           )}
         </div>
       </div>
 
-      {/* Sticky bottom CTA: above main nav when authenticated */}
+      {/* Sticky bottom CTA */}
       <StickyContactBar
         isLoggedIn={isLoggedIn}
         workerId={id}
         displayName={displayName}
       />
+      </PageContainer>
     </main>
   );
 }
@@ -314,15 +306,16 @@ function StickyContactBar({
   workerId: string;
   displayName: string;
 }) {
+  const name = displayName.trim() || "Worker";
   return (
     <div
-      className={`fixed left-0 right-0 max-w-[480px] mx-auto bg-white border-t border-card-border p-4 shadow-nav-top z-30 safe-area-bottom ${isLoggedIn ? "bottom-[60px]" : "bottom-0"}`}
+      className={`fixed left-0 right-0 max-w-[480px] mx-auto bg-white border-t border-[#E8E4DF] p-4 shadow-[0_-2px_12px_rgba(0,0,0,0.06)] z-30 safe-area-bottom ${isLoggedIn ? "bottom-[60px]" : "bottom-0"}`}
     >
       <Link
         href={isLoggedIn ? "/jobs/new" : `/login?next=/workers/${workerId}`}
-        className="btn-primary flex w-full items-center justify-center"
+        className="btn-primary flex w-full items-center justify-center gap-2"
       >
-        KONTAKIN SI {displayName.toUpperCase()}
+        Contact {name}
       </Link>
     </div>
   );

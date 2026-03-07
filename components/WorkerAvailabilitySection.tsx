@@ -45,10 +45,10 @@ export default function WorkerAvailabilitySection() {
       if (res.ok) {
         setMessage("Na-update ang availability mo.");
       } else {
-        setMessage(data.error || "Hindi masave. Subukan muli.");
+        setMessage(data.error || "Could not save. Try again.");
       }
     } catch {
-      setMessage("May nangyaring error. Subukan muli.");
+      setMessage("Something went wrong. Try again.");
     } finally {
       setSaving(false);
     }
@@ -66,7 +66,7 @@ export default function WorkerAvailabilitySection() {
     <div className="rounded-lg border border-gray-200 p-3 space-y-2">
       <p className="text-sm font-medium text-gray-700">Availability</p>
       <p className="text-xs text-gray-500 mb-2">
-        Piliin kung kailan ka available para sa mga job. Araw-araw 10 PM PHT, magre-reset ito sa Not Available kung hindi mo babaguhin.
+        Choose when you&apos;re available for jobs. Every day at 10 PM PHT this resets to Not Available unless you change it.
       </p>
       <select
         value={availability}

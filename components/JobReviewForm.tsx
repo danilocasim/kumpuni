@@ -38,7 +38,7 @@ export default function JobReviewForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating == null || rating < 1 || rating > 5) {
-      setError("Piliin ang rating (1–5 stars).");
+      setError("Please select a rating (1–5 stars).");
       return;
     }
     setError("");
@@ -47,7 +47,7 @@ export default function JobReviewForm({
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError("Kailangan mag-log in.");
+        setError("You need to log in.");
         return;
       }
       const { error: insertErr } = await supabase.from("reviews").insert({
@@ -59,7 +59,7 @@ export default function JobReviewForm({
         tags: tags.length > 0 ? tags : [],
       });
       if (insertErr) {
-        setError(insertErr.message || "Hindi masave ang review. Subukan muli.");
+        setError(insertErr.message || "Could not save review. Try again.");
         return;
       }
       setSubmitted(true);
@@ -75,7 +75,7 @@ export default function JobReviewForm({
           Salamat! Na-submit na ang review mo.
         </p>
         <Link href={`/jobs/${jobId}`} className="btn-primary inline-flex">
-          Balik sa job detail
+          Back to job detail
         </Link>
       </div>
     );
@@ -106,7 +106,7 @@ export default function JobReviewForm({
 
       <div>
         <label htmlFor="comment" className="label-kumpuni">
-          Komento (opsyonal, max 300 character)
+          Comment (optional, max 300 characters)
         </label>
         <textarea
           id="comment"
@@ -120,7 +120,7 @@ export default function JobReviewForm({
       </div>
 
       <div>
-        <p className="label-kumpuni">Tags (optional, pili ng lahat na applicable)</p>
+        <p className="label-kumpuni">Tags (optional, select all that apply)</p>
         <div className="flex flex-wrap gap-2 mt-1">
           {REVIEW_TAGS.map((tag) => (
             <button
@@ -150,11 +150,11 @@ export default function JobReviewForm({
         disabled={submitting || rating == null}
         className="btn-primary w-full disabled:opacity-50"
       >
-        {submitting ? "Sinusave..." : "I-SUBMIT ANG REVIEW"}
+        {submitting ? "Saving..." : "SUBMIT REVIEW"}
       </button>
 
       <Link href={`/jobs/${jobId}`} className="btn-ghost block text-center text-caption">
-        ← Balik sa job detail
+        ← Back to job detail
       </Link>
     </form>
   );

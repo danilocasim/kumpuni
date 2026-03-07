@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ServiceAreaPicker, type ServiceAreaValue } from "@/components/ServiceAreaPicker";
+import { PageContainer } from "@/components/PageContainer";
 
 const SKILLS = [
   { value: "plumbing", label: "Plumbing" },
@@ -129,10 +130,10 @@ export default function WorkerSetupPage() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Hindi masave.");
+      if (!res.ok) throw new Error(data.error || "Could not save.");
       router.push(data.redirect || "/worker/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "May nangyaring error. Subukan muli.");
+      setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
       setSubmitting(false);
     }
@@ -140,32 +141,39 @@ export default function WorkerSetupPage() {
 
   if (!mounted) {
     return (
-      <main className="min-h-screen p-4">
-        <p className="text-gray-500">Naglo-load...</p>
+      <main className="min-h-screen page-bg pt-6">
+        <PageContainer>
+          <p className="text-muted-gray font-body">Loading...</p>
+        </PageContainer>
       </main>
     );
   }
 
   if (!user) {
     return (
-      <main className="min-h-screen p-4 max-w-lg mx-auto">
-        <h1 className="text-xl font-bold mb-4">Worker setup</h1>
-        <p className="text-gray-600 mb-4">
-          Mag-log in muna para makumpleto ang profile. OTP lang ang kailangan.
-        </p>
-        <Link
-          href="/login?role=worker&next=/worker/setup"
-          className="min-h-touch inline-flex items-center justify-center px-4 rounded-lg bg-blue-600 text-white font-medium"
-        >
-          Mag-log in
-        </Link>
+      <main className="min-h-screen page-bg pt-6">
+        <PageContainer>
+          <h1 className="font-display text-2xl font-bold text-slate-text mb-4">Worker setup</h1>
+          <p className="text-body text-muted-gray mb-4">
+            Log in first to complete your profile. OTP only.
+          </p>
+          <Link
+            href="/login?role=worker&next=/worker/setup"
+            className="btn-primary inline-flex justify-center"
+          >
+            MAG-LOG IN
+          </Link>
+        </PageContainer>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold mb-4">Setup ng worker profile</h1>
+    <main className="min-h-screen page-bg pt-6 pb-12">
+      <PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-4 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+        Setup ng worker profile
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Display name *</label>
@@ -217,7 +225,7 @@ export default function WorkerSetupPage() {
             onChange={(e) => setExperienceLevel(e.target.value)}
             className="w-full min-h-touch px-3 rounded border border-gray-300"
           >
-            <option value="">Piliin...</option>
+            <option value="">Select...</option>
             {EXPERIENCE_LEVELS.map((l) => (
               <option key={l.value} value={l.value}>
                 {l.label}
@@ -258,7 +266,7 @@ export default function WorkerSetupPage() {
             onChange={setServiceArea}
           />
           {!serviceArea && (
-            <p className="text-xs text-amber-600 mt-1">Ilagay ang center at radius para makita ka sa browse.</p>
+            <p className="text-xs text-amber-600 mt-1">Set your center and radius to appear in browse.</p>
           )}
         </div>
 
@@ -273,7 +281,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Bio (opsyonal, max 200)</label>
+          <label className="block text-sm font-medium mb-1">Bio (optional, max 200)</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
@@ -286,7 +294,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Portfolio (opsyonal, max 6 photos)</label>
+          <label className="block text-sm font-medium mb-1">Portfolio (optional, max 6 photos)</label>
           <input
             type="file"
             accept="image/*"
@@ -309,11 +317,12 @@ export default function WorkerSetupPage() {
         <button
           type="submit"
           disabled={submitting || skills.length === 0 || !serviceArea}
-          className="w-full min-h-touch rounded-lg bg-blue-600 text-white font-medium disabled:opacity-50"
+          className="btn-primary w-full disabled:opacity-50"
         >
-          {submitting ? "Sinusave..." : "I-save ang profile"}
+          {submitting ? "Saving..." : "Save profile"}
         </button>
       </form>
+      </PageContainer>
     </main>
   );
 }

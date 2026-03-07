@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!phone || typeof phone !== "string") {
       return NextResponse.json(
-        { error: "Kailangan ang numero ng telepono. Subukan muli." },
+        { error: "Phone number is required. Try again." },
         { status: 400 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (countError) {
       console.error("OTP rate limit check failed:", countError);
       return NextResponse.json(
-        { error: "May problema sa server. Subukan muli." },
+        { error: "Server problem. Try again." },
         { status: 500 }
       );
     }
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     if ((count ?? 0) >= MAX_ATTEMPTS) {
       return NextResponse.json(
         {
-          error: "Sobra na ang pagsubok. Maghintay ng 15 minuto bago muling magpadala. Subukan muli.",
+          error: "Too many attempts. Wait 15 minutes before sending again. Try again.",
         },
         { status: 429 }
       );
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       console.error("Supabase signInWithOtp failed:", otpError.message);
       return NextResponse.json(
         {
-          error: "Hindi mapadala ang verification code. Subukan muli.",
+          error: "Could not send verification code. Try again.",
         },
         { status: 502 }
       );
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("OTP send error:", err);
     return NextResponse.json(
-      { error: "May nangyaring error. Subukan muli." },
+      { error: "Something went wrong. Try again." },
       { status: 500 }
     );
   }

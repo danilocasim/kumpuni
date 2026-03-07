@@ -7,20 +7,21 @@ import { Nav } from "@/components/Nav";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["700", "800"],
+  weight: ["600", "700", "800"],
   display: "swap",
   variable: "--font-plus-jakarta",
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-dm-sans",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
+  weight: ["500"],
   display: "swap",
   variable: "--font-jetbrains",
 });
@@ -51,7 +52,9 @@ export default async function RootLayout({
     <html lang="tl" className={`${plusJakarta.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased min-h-screen page-bg">
         <Nav userRole={userRole} isAuthenticated={!!user} />
-        {children}
+        <div className="mb-20 lg:mb-0">
+          {children}
+        </div>
       </body>
     </html>
   );
