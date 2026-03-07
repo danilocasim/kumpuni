@@ -1,0 +1,36 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# kumpuni Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-07
+
+## Active Technologies
+- TypeScript 5.x, Node 18+ + Next.js 14 (App Router), Tailwind CSS, Supabase JS client, **Twilio** (Phone OTP + all SMS: worker alerts, digests), **Leaflet** (react-leaflet or leaflet), browser-image-compression (001-kumpuni-mvp)
+- Supabase PostgreSQL + PostGIS; Supabase Storage (avatars, portfolios, jobs, verification buckets) (001-kumpuni-mvp)
+
+## Project Structure
+
+```text
+backend/
+frontend/
+tests/
+```
+
+## Commands
+
+npm test && npm run lint
+
+## Code Style
+
+TypeScript 5.x, Node 18+: Follow standard conventions
+
+## Recent Changes
+- 001-kumpuni-mvp: Twilio for all SMS (OTP + worker alerts); Leaflet for maps
+
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

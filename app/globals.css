@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Design system: Kapitbahay Energy --- */
+:root {
+  --kumpuni-blue: #1B4A6B;
+  --action-orange: #E8722A;
+  --concrete-white: #F5F2EE;
+  --wood-brown: #8B6914;
+  --verified-green: #2D8B4E;
+  --slate-text: #3A3A3A;
+  --muted-gray: #9B9B9B;
+  --danger-red: #C0392B;
+  --blue-light: #E8F0F7;
+  --orange-light: #FFF0E6;
+  --green-light: #E6F5EC;
+  --shadow-sm: 0 1px 3px rgba(27, 74, 107, 0.08);
+  --shadow-md: 0 4px 12px rgba(27, 74, 107, 0.12);
+  --shadow-lg: 0 8px 24px rgba(27, 74, 107, 0.16);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --touch-min: 48px;
+}
+
+/* Base: warm background + subtle grain texture (concrete wall feel) */
+body {
+  background-color: var(--concrete-white);
+  color: var(--slate-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle noise overlay - very low opacity for texture only */
+.page-bg {
+  background-color: var(--concrete-white);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* Leaflet map container */
+.leaflet-container {
+  height: 100%;
+  min-height: 200px;
+  z-index: 0;
+}
+
+.avatar-marker-icon {
+  background: none !important;
+  border: none !important;
+}
+.avatar-marker-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--kumpuni-blue);
+  box-shadow: var(--shadow-sm);
+}
+.avatar-marker-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Touch targets */
+@layer base {
+  .touch-target {
+    min-height: var(--touch-min);
+    min-width: var(--touch-min);
+  }
+}
+
+/* --- Component layer: buttons --- */
+@layer components {
+  .btn-primary {
+    @apply min-h-[48px] px-4 rounded-kumpuni-sm font-heading font-bold text-base uppercase tracking-wide;
+    background-color: var(--action-orange);
+    color: white;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.1s ease, filter 0.1s ease;
+  }
+  .btn-primary:hover {
+    filter: brightness(0.95);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    @apply min-h-[48px] px-4 rounded-kumpuni-sm font-heading font-bold text-base border-2 bg-transparent;
+    color: var(--kumpuni-blue);
+    border-color: var(--kumpuni-blue);
+    transition: background-color 0.15s ease, transform 0.1s ease;
+  }
+  .btn-secondary:hover {
+    background-color: var(--blue-light);
+  }
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-ghost {
+    @apply font-medium text-kumpuni-blue underline-offset-2 hover:underline;
+  }
+
+  /* Cards: white on concrete, warm border, subtle shadow */
+  .card-kumpuni {
+    background: #FFFFFF;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-kumpuni:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Status badges: compact pill, dot + text */
+  .badge-status {
+    @apply inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide;
+  }
+  .badge-asap { background: var(--orange-light); color: var(--action-orange); }
+  .badge-this-week { background: var(--blue-light); color: var(--kumpuni-blue); }
+  .badge-flexible { background: #F0F0F0; color: var(--muted-gray); }
+  .badge-available { background: var(--green-light); color: var(--verified-green); }
+  .badge-not-available { background: #F0F0F0; color: var(--muted-gray); }
+  .badge-completed { background: var(--green-light); color: var(--verified-green); }
+  .badge-cancelled { background: #FDEDEC; color: var(--danger-red); }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge-asap .badge-dot { background: var(--action-orange); }
+  .badge-this-week .badge-dot { background: var(--kumpuni-blue); }
+  .badge-flexible .badge-dot,
+  .badge-not-available .badge-dot { background: var(--muted-gray); }
+  .badge-available .badge-dot,
+  .badge-completed .badge-dot { background: var(--verified-green); }
+  .badge-cancelled .badge-dot { background: var(--danger-red); }
+
+  /* Form inputs */
+  .input-kumpuni {
+    @apply w-full min-h-[48px] px-3 rounded-kumpuni-sm bg-white border-[1.5px] text-body;
+    border-color: var(--warm-border-input);
+    color: var(--slate-text);
+  }
+  .input-kumpuni:focus {
+    outline: none;
+    border-width: 2px;
+    border-color: var(--kumpuni-blue);
+  }
+  .input-kumpuni.error {
+    border-color: var(--danger-red);
+  }
+  .label-kumpuni {
+    @apply block text-caption font-medium text-slate-text mb-1;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    background: #E8E4DF;
+    border-radius: var(--radius-sm);
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes skeleton-shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ASAP pulsing dot */
+  .pulse-asap {
+    animation: pulse-asap 2s ease-in-out infinite;
+  }
+  @keyframes pulse-asap {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* One-time CTA pulse on load (not infinite) */
+  .animate-cta-pulse {
+    animation: cta-pulse 1.2s ease-out 1;
+  }
+  @keyframes cta-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(232, 114, 42, 0.35); }
+    70% { box-shadow: 0 0 0 12px rgba(232, 114, 42, 0); }
+    100% { box-shadow: var(--shadow-sm); }
+  }
+
+  /* Card appear: stagger fade-in + slide up */
+  .animate-in {
+    animation: fade-in-up 0.3s ease-out backwards;
+  }
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Safe area for notched phones (bottom nav) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
