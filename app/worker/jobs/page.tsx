@@ -21,7 +21,7 @@ const URGENCY_LABELS: Record<string, string> = {
 export default async function WorkerJobsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/worker/jobs");
+  if (!user) redirect("/login?role=worker&next=/worker/jobs");
 
   const admin = createAdminClient();
   const { data: jobs, error } = await admin.rpc("get_worker_job_feed", {

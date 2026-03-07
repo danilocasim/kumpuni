@@ -132,7 +132,7 @@ export default function WorkerSetupPage() {
       if (!res.ok) throw new Error(data.error || "Hindi masave.");
       router.push(data.redirect || "/worker/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "May nangyaring error.");
+      setError(err instanceof Error ? err.message : "May nangyaring error. Subukan muli.");
     } finally {
       setSubmitting(false);
     }
@@ -141,7 +141,7 @@ export default function WorkerSetupPage() {
   if (!mounted) {
     return (
       <main className="min-h-screen p-4">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">Naglo-load...</p>
       </main>
     );
   }
@@ -181,7 +181,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Profile photo *</label>
+          <label className="block text-sm font-medium mb-1">Larawan ng profile *</label>
           <input
             type="file"
             accept="image/*"
@@ -273,7 +273,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Bio (optional, max 200)</label>
+          <label className="block text-sm font-medium mb-1">Bio (opsyonal, max 200)</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
@@ -286,7 +286,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Portfolio (optional, max 6 photos)</label>
+          <label className="block text-sm font-medium mb-1">Portfolio (opsyonal, max 6 photos)</label>
           <input
             type="file"
             accept="image/*"

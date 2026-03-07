@@ -57,7 +57,7 @@ export default function WorkerAvailabilitySection() {
   if (loading) {
     return (
       <div className="rounded-lg border border-gray-200 p-3">
-        <p className="text-sm text-gray-500">Loading availability...</p>
+        <p className="text-sm text-gray-500">Sinisilip ang availability...</p>
       </div>
     );
   }

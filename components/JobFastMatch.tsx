@@ -181,7 +181,9 @@ export default function JobFastMatch({
       <h2 className="font-semibold">Mga worker na interested</h2>
       {!workers.length ? (
         <p className="text-gray-600">
-          Wala pang nag-express ng interest. Maghintay lang — real-time ang listahan.
+          {isExpired
+            ? "Walang workers sa radius na nag-express ng interest. Automatic na naka-Flexible Match na ang job — pwede mo na tingnan ang listahan sa job detail."
+            : "Wala pang nag-express ng interest. Maghintay lang — real-time ang listahan. Pag walang interested sa 15 min, automatic na maging Flexible ang job."}
         </p>
       ) : (
         <ul className="space-y-3">

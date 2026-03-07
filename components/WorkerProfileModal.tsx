@@ -101,6 +101,7 @@ export default function WorkerProfileModal({
               src={worker.avatar_url}
               alt=""
               className="h-16 w-16 rounded-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl font-medium">
@@ -169,7 +170,7 @@ export default function WorkerProfileModal({
             onClick={handleContact}
             className="min-h-touch w-full rounded-lg bg-blue-600 px-4 font-medium text-white disabled:opacity-50"
           >
-            {loading ? "Loading..." : "Contact (ipakita ang numero)"}
+            {loading ? "Naglo-load..." : "Contact (ipakita ang numero)"}
           </button>
         )}
 

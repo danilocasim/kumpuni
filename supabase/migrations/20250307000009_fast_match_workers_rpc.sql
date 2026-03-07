@@ -1,5 +1,7 @@
 -- T025: RPC to get eligible workers for Fast Match (ASAP job)
 -- Returns workers: available_now or open_anytime, category in skills, within 10km, no job in matched/in_progress
+-- REQUIRES: Run migration 20250307000001 first (PostGIS WITH SCHEMA extensions). If you see "type geography does not exist",
+-- enable PostGIS in Supabase Dashboard: Database → Extensions → postgis, or run: CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA extensions;
 
 CREATE OR REPLACE FUNCTION public.get_fast_match_workers(p_job_id uuid)
 RETURNS TABLE (worker_user_id uuid, phone text, push_subscription jsonb)

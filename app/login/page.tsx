@@ -7,8 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const role = searchParams.get("role") ?? "homeowner";
-  const nextPath = searchParams.get("next") ?? (role === "worker" ? "/worker/setup" : "/jobs/new");
+  const role = searchParams?.get("role") ?? "homeowner";
+  const nextPath = searchParams?.get("next") ?? (role === "worker" ? "/worker/setup" : "/jobs/new");
 
   const [phone, setPhone] = useState("");
   const [token, setToken] = useState("");
@@ -56,7 +56,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Invalid code. Subukan muli.");
+        setError(data.error || "Hindi wasto ang code. Subukan muli.");
         return;
       }
       router.push(data.redirect || nextPath);

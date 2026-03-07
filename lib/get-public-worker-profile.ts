@@ -34,7 +34,7 @@ export async function getPublicWorkerProfile(workerUserId: string) {
 
   const { data: reviews } = await admin
     .from("reviews")
-    .select("id, reviewer_id, rating, comment, tags, created_at")
+    .select("id, reviewer_id, rating, comment, tags, response, created_at")
     .eq("reviewee_id", workerUserId)
     .order("created_at", { ascending: false })
     .limit(5);

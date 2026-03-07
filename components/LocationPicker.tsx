@@ -100,8 +100,12 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
         onChange({ lat, lng, barangay: barangay || "Iba pa (manual)" });
         setLoading(false);
       },
-      () => {
-        setError("Hindi makuha ang lokasyon. Piliin na lang sa mapa o barangay.");
+      (err) => {
+        setError(
+          err?.code === 1
+            ? "Na-deny ang location permission. Piliin na lang sa mapa o barangay."
+            : "Hindi makuha ang lokasyon. Subukan muli o piliin sa mapa o barangay."
+        );
         setLoading(false);
       }
     );
@@ -127,7 +131,7 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
         </button>
       </div>
       {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-      <label className="block text-sm font-medium mb-1">Barangay (optional, pili sa list)</label>
+      <label className="block text-sm font-medium mb-1">Barangay (opsyonal, pili sa list)</label>
       <select
         value={barangay}
         onChange={handleBarangayChange}

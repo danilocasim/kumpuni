@@ -94,7 +94,7 @@ export default function BrowseWorkersMap({
   if (!mounted) {
     return (
       <div className="h-64 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">
-        Loading map...
+        Naglo-load ang mapa...
       </div>
     );
   }

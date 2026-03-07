@@ -142,10 +142,10 @@
 
 **Independent Test**: Status updates in real time; confirm + review on Completed; 48h auto-complete; cancel before In Progress.
 
-- [ ] T045 [US6] Implement app/jobs/[id]/page.tsx (homeowner): Supabase Realtime subscription on jobs for this id; show status timeline (Open, Matched, In Progress, Completed/Cancelled); when status=completed and worker set it, show "Confirm completion and leave review" CTA linking to /jobs/[id]/review
-- [ ] T046 [US6] Implement 48-hour auto-complete: cron or Edge Function finds jobs where worker set status=completed but homeowner not confirmed; after 48h set completed_at if not set and treat as completed (allow review prompt to remain available)
-- [ ] T047 [US6] Implement cancel: on app/jobs/[id] and app/worker/jobs/[id] show Cancel button when status is open or matched (not in_progress); update jobs.status = cancelled; apply RLS so both parties can update status for cancel
-- [ ] T048 [US6] Ensure job detail page for worker app/worker/jobs/[id] shows real-time status and same cancel/status flow
+- [x] T045 [US6] Implement app/jobs/[id]/page.tsx (homeowner): Supabase Realtime subscription on jobs for this id; show status timeline (Open, Matched, In Progress, Completed/Cancelled); when status=completed and worker set it, show "Confirm completion and leave review" CTA linking to /jobs/[id]/review
+- [x] T046 [US6] Implement 48-hour auto-complete: cron or Edge Function finds jobs where worker set status=completed but homeowner not confirmed; after 48h set completed_at if not set and treat as completed (allow review prompt to remain available)
+- [x] T047 [US6] Implement cancel: on app/jobs/[id] and app/worker/jobs/[id] show Cancel button when status is open or matched (not in_progress); update jobs.status = cancelled; apply RLS so both parties can update status for cancel
+- [x] T048 [US6] Ensure job detail page for worker app/worker/jobs/[id] shows real-time status and same cancel/status flow
 
 **Checkpoint**: US6 complete — status tracking and cancel
 
@@ -157,10 +157,10 @@
 
 **Independent Test**: Submit rating + tags; reviewee adds response; ratings hidden until both or 48h; flag low-rated workers.
 
-- [ ] T049 [US7] Implement app/jobs/[id]/review/page.tsx: form 1–5 stars (required), comment (max 300 chars), multi-select Taglish tags (Maagap, Malinis ang trabaho, Mabait, Sulit, Mahal, Na-late); submit inserts into reviews (job_id, reviewer_id, reviewee_id, rating, comment, tags); do not show other party's rating until both submitted or 48h passed
-- [ ] T050 [US7] Implement review display: on worker profile and job history show reviews (rating, comment, tags); reviewee can add one response (max 200 chars) — update reviews.response with RLS so only reviewee can update own row's response once
-- [ ] T051 [US7] After each new review for a worker, recompute worker_profiles.avg_rating; add admin flag or column when avg_rating &lt; 2.5 and review count >= 5 (admin review via Supabase Studio per spec)
-- [ ] T052 [US7] Prompt both parties to review from job detail or dashboard when job is completed; link to /jobs/[id]/review with reviewee context
+- [x] T049 [US7] Implement app/jobs/[id]/review/page.tsx: form 1–5 stars (required), comment (max 300 chars), multi-select Taglish tags (Maagap, Malinis ang trabaho, Mabait, Sulit, Mahal, Na-late); submit inserts into reviews (job_id, reviewer_id, reviewee_id, rating, comment, tags); do not show other party's rating until both submitted or 48h passed
+- [x] T050 [US7] Implement review display: on worker profile and job history show reviews (rating, comment, tags); reviewee can add one response (max 200 chars) — update reviews.response with RLS so only reviewee can update own row's response once
+- [x] T051 [US7] After each new review for a worker, recompute worker_profiles.avg_rating; add admin flag or column when avg_rating &lt; 2.5 and review count >= 5 (admin review via Supabase Studio per spec)
+- [x] T052 [US7] Prompt both parties to review from job detail or dashboard when job is completed; link to /jobs/[id]/review with reviewee context
 
 **Checkpoint**: US7 complete — mutual blind reviews and responses
 
@@ -172,9 +172,9 @@
 
 **Independent Test**: Toggle availability; see active job and history; log earnings; see completeness.
 
-- [ ] T053 [US8] Add active job section and job history list to app/worker/dashboard/page.tsx (availability section already from T039); show active job with status and homeowner contact/address, job history (dates, categories, ratings) (if any job in matched or in_progress show it with status and homeowner contact/address); job history list (dates, categories, ratings)
-- [ ] T054 [US8] Add earnings self-report: on dashboard or job detail for completed jobs, worker can set worker_reported_amount (PHP) for own records; update jobs.worker_reported_amount with RLS
-- [ ] T055 [US8] Add profile completeness indicator on app/worker/dashboard/page.tsx: check required fields and is_verified; display e.g. "Kumpleto" / "Kulang pa" with missing items (Taglish)
+- [x] T053 [US8] Add active job section and job history list to app/worker/dashboard/page.tsx (availability section already from T039); show active job with status and homeowner contact/address, job history (dates, categories, ratings) (if any job in matched or in_progress show it with status and homeowner contact/address); job history list (dates, categories, ratings)
+- [x] T054 [US8] Add earnings self-report: on dashboard or job detail for completed jobs, worker can set worker_reported_amount (PHP) for own records; update jobs.worker_reported_amount with RLS
+- [x] T055 [US8] Add profile completeness indicator on app/worker/dashboard/page.tsx: check required fields and is_verified; display e.g. "Kumpleto" / "Kulang pa" with missing items (Taglish)
 
 **Checkpoint**: US8 complete — worker dashboard with earnings and completeness
 
@@ -184,12 +184,12 @@
 
 **Purpose**: Mobile optimization, Taglish copy, edge cases, deploy
 
-- [ ] T056 [P] Audit all UI copy for Taglish (labels, errors, CTAs, placeholders); replace any English-only strings; ensure "Subukan muli" and error messages in Taglish
-- [ ] T057 [P] Mobile pass: ensure touch targets ≥44px; one-thumb flows; page weight &lt;500KB excluding uploads (images lazy, compress assets)
-- [ ] T058 Handle edge cases: geolocation denied → manual location only in LocationPicker; no workers in radius for Fast Match → show message, rely on auto-convert to Flexible; worker with no reviews → show "Walang reviews" and neutral response_rate in sort
-- [ ] T059 Add app/worker/profile/page.tsx for edit profile, portfolio, rates (and service area if needed) reusing setup components
-- [ ] T060 Document Vercel deploy: env vars, optional cron for /api/cron/fast-match-expiry, availability-reset, sms-digest; run quickstart.md validation
-- [ ] T061 Run quickstart.md validation checklist end-to-end (manual)
+- [x] T056 [P] Audit all UI copy for Taglish (labels, errors, CTAs, placeholders); replace any English-only strings; ensure "Subukan muli" and error messages in Taglish
+- [x] T057 [P] Mobile pass: ensure touch targets ≥44px; one-thumb flows; page weight &lt;500KB excluding uploads (images lazy, compress assets)
+- [x] T058 Handle edge cases: geolocation denied → manual location only in LocationPicker; no workers in radius for Fast Match → show message, rely on auto-convert to Flexible; worker with no reviews → show "Walang reviews" and neutral response_rate in sort
+- [x] T059 Add app/worker/profile/page.tsx for edit profile, portfolio, rates (and service area if needed) reusing setup components
+- [x] T060 Document Vercel deploy: env vars, optional cron for /api/cron/fast-match-expiry, availability-reset, sms-digest; run quickstart.md validation
+- [x] T061 Run quickstart.md validation checklist end-to-end (manual)
 
 ---
 

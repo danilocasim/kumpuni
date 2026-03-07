@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notifyFastMatchWorkers } from "@/lib/fast-match-notify";
+import { getSessionRole, canUseHomeownerFeatures } from "@/lib/auth-role";
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { user, role } = await getSessionRole(supabase);
     if (!user) {
       return NextResponse.json({ error: "Kailangan mag-log in." }, { status: 401 });
+    }
+    if (!canUseHomeownerFeatures(role)) {
+      return NextResponse.json(
+        { error: "Para sa homeowners lang ang pag-post ng job." },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

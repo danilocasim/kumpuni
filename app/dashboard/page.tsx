@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getSessionRole, canUseHomeownerFeatures } from "@/lib/auth-role";
 
 const STATUS_LABELS: Record<string, string> = {
-  open: "Open",
-  matched: "Matched",
-  in_progress: "In Progress",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  open: "Bukas",
+  matched: "Na-match",
+  in_progress: "Ginagawa",
+  completed: "Tapos na",
+  cancelled: "Na-cancel",
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -27,16 +28,34 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: "General Repair",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message?: string }>;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { user, role } = await getSessionRole(supabase);
   if (!user) redirect("/");
+  if (!canUseHomeownerFeatures(role)) redirect("/worker/dashboard?message=homeowner_only");
+
+  const { message } = await searchParams;
 
   const { data: jobs, error } = await supabase
     .from("jobs")
     .select("id, category, description, status, created_at, urgency, matching_mode")
     .eq("homeowner_id", user.id)
     .order("created_at", { ascending: false });
+
+  const completedIds = (jobs ?? []).filter((j) => j.status === "completed").map((j) => j.id);
+  let reviewedJobIds: string[] = [];
+  if (completedIds.length > 0) {
+    const { data: reviews } = await supabase
+      .from("reviews")
+      .select("job_id")
+      .eq("reviewer_id", user.id)
+      .in("job_id", completedIds);
+    reviewedJobIds = (reviews ?? []).map((r) => r.job_id);
+  }
 
   if (error) {
     return (
@@ -51,6 +70,11 @@ export default async function DashboardPage() {
       <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-6">
         Mga Job ko
       </h1>
+      {message === "worker_only" && (
+        <div className="mb-4 p-3 rounded-kumpuni-sm bg-blue-light/50 border border-kumpuni-blue/30 text-body text-slate-text">
+          Para sa workers lang ang section na iyon. Dito mo maaaring i-post ang mga job at tingnan ang status.
+        </div>
+      )}
       {!jobs?.length ? (
         <>
           <p className="text-body text-slate-text">Wala ka pang na-post na job.</p>
@@ -88,14 +112,14 @@ export default async function DashboardPage() {
                 {job.status === "open" && (
                   <div className="mt-2 flex gap-2">
                     <Link href={`/jobs/${job.id}`} className="btn-ghost text-caption">
-                      Detail
+                      Detalye
                     </Link>
                     {job.matching_mode === "flexible" && (
                       <Link
                         href={`/jobs/${job.id}/browse`}
                         className="btn-ghost text-caption font-medium"
                       >
-                        Browse workers
+                        Tingnan ang workers
                       </Link>
                     )}
                     {job.matching_mode === "fast" && (
@@ -106,6 +130,16 @@ export default async function DashboardPage() {
                         Fast Match
                       </Link>
                     )}
+                  </div>
+                )}
+                {job.status === "completed" && !reviewedJobIds.includes(job.id) && (
+                  <div className="mt-2">
+                    <Link
+                      href={`/jobs/${job.id}/review`}
+                      className="btn-ghost text-caption font-medium text-verified-green"
+                    >
+                      Mag-iwan ng review →
+                    </Link>
                   </div>
                 )}
               </div>

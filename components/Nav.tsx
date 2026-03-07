@@ -85,13 +85,13 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
       >
         <NavLink href="/" active={pathname === "/"}>
           <Home className="h-5 w-5" strokeWidth={2} />
-          Home
+          Bahay
         </NavLink>
         {showHomeowner && (
           <NavLink
             href="/dashboard"
             active={
-              pathname === "/dashboard" || pathname.startsWith("/jobs/")
+              pathname === "/dashboard" || (pathname?.startsWith("/jobs/") ?? false)
             }
           >
             <Briefcase className="h-5 w-5" strokeWidth={2} />
@@ -101,7 +101,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
         {showWorker && !showHomeowner && (
           <NavLink
             href="/worker/jobs"
-            active={pathname.startsWith("/worker/jobs")}
+            active={pathname?.startsWith("/worker/jobs") ?? false}
           >
             <Briefcase className="h-5 w-5" strokeWidth={2} />
             Mga Job
@@ -121,7 +121,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
           }
         >
           <User className="h-5 w-5" strokeWidth={2} />
-          Profile
+          Profile ko
         </NavLink>
       </nav>
     </>

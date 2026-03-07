@@ -75,5 +75,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## 5. Deploy (Vercel)
 
-- Connect repo; set env vars
-- Maps use Leaflet (no API key). Optional: Vercel Cron for `/api/cron/fast-match-expiry`, `/api/cron/availability-reset`, `/api/cron/sms-digest`
+- Connect repo; set env vars (see [docs/DEPLOY-VERCEL.md](../../docs/DEPLOY-VERCEL.md) for full list and optional cron).
+- Maps use Leaflet (no API key). Optional: Vercel Cron for `/api/cron/fast-match-expiry`, `/api/cron/availability-reset`, `/api/cron/sms-digest`.
+- After deploy, run the [Quickstart validation checklist](../../docs/QUICKSTART-VALIDATION.md) (T061) for end-to-end validation.

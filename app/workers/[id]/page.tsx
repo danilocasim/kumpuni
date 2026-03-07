@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicWorkerProfile } from "@/lib/get-public-worker-profile";
 import WorkerProfileMap from "@/components/WorkerProfileMap";
+import ReviewResponseForm from "@/components/ReviewResponseForm";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 
 const SKILL_LABELS: Record<string, string> = {
@@ -80,6 +81,7 @@ export default async function PublicWorkerProfilePage({
                 src={user.avatar_url}
                 alt=""
                 className="h-full w-full object-cover"
+                loading="lazy"
               />
             ) : (
               <span className="flex h-full w-full items-center justify-center font-heading text-2xl font-bold text-white/80">
@@ -208,17 +210,21 @@ export default async function PublicWorkerProfilePage({
         )}
 
         {/* Reviews */}
-        {recent_reviews.length > 0 && (
-          <div className="mt-6">
-            <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
-              Reviews
-            </h2>
+        <div className="mt-6">
+          <h2 className="font-heading text-[15px] font-bold text-slate-text mb-2">
+            Mga review
+          </h2>
+          {recent_reviews.length === 0 ? (
+            <p className="text-body text-muted-gray">Walang reviews.</p>
+          ) : (
             <ul className="space-y-4">
               {recent_reviews.map(
                 (r: {
                   id: string;
                   rating: number;
                   comment: string | null;
+                  tags: string[] | null;
+                  response: string | null;
                   created_at: string;
                 }) => (
                   <li
@@ -239,19 +245,42 @@ export default async function PublicWorkerProfilePage({
                     {r.comment && (
                       <p className="text-body text-slate-text">{r.comment}</p>
                     )}
+                    {Array.isArray(r.tags) && r.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {r.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded px-1.5 py-0.5 text-xs bg-blue-light text-kumpuni-blue"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {r.response && (
+                      <p className="text-body text-slate-text mt-2 pl-2 border-l-2 border-muted-gray/30 italic">
+                        Sagot: {r.response}
+                      </p>
+                    )}
+                    {currentUser?.id === id && !r.response && (
+                      <ReviewResponseForm
+                        reviewId={r.id}
+                        initialResponse={null}
+                      />
+                    )}
                   </li>
                 )
               )}
             </ul>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Contact CTA text */}
         <div className="mt-6 text-body text-slate-text">
           {isLoggedIn ? (
             <p>
               Para makipag-ugnayan, mag-post ng job at hanapin ang worker na ito
-              sa &quot;Browse workers&quot; — doon mo makikita ang contact
+              sa &quot;Tingnan ang workers&quot; — doon mo makikita ang contact
               number.
             </p>
           ) : (
@@ -260,7 +289,7 @@ export default async function PublicWorkerProfilePage({
                 Mag-log in
               </Link>{" "}
               para makita kung paano makipag-ugnayan (mag-post ng job, tapos
-              piliin ang worker sa Browse).
+              piliin ang worker sa listahan).
             </p>
           )}
         </div>

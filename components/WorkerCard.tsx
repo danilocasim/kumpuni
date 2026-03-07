@@ -90,6 +90,7 @@ export function WorkerCard({
             src={worker.avatar_url}
             alt=""
             className="h-full w-full object-cover"
+            loading="lazy"
           />
         ) : (
           <span className="font-heading text-lg font-bold text-muted-gray">

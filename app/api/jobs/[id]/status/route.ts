@@ -3,10 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const WORKER_ALLOWED_STATUSES = ["in_progress", "completed"] as const;
+const CANCEL_ALLOWED_STATUSES = ["open", "matched"] as const;
 
 /**
- * PATCH: Worker updates job status (On My Way → in_progress, Completed → completed).
- * Only the assigned worker can update. Sets completed_at when status = completed.
+ * PATCH: Update job status.
+ * - Worker: in_progress | completed (when assigned); cancelled (when matched, worker backing out).
+ * - Homeowner: cancelled (when open or matched).
  */
 export async function PATCH(
   request: NextRequest,
@@ -22,25 +24,63 @@ export async function PATCH(
 
     const body = await request.json();
     const status = body?.status;
-    if (
-      typeof status !== "string" ||
-      !WORKER_ALLOWED_STATUSES.includes(status as (typeof WORKER_ALLOWED_STATUSES)[number])
-    ) {
-      return NextResponse.json(
-        { error: "Invalid status. Pwedeng in_progress o completed lang." },
-        { status: 400 }
-      );
+    if (typeof status !== "string") {
+      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
     const admin = createAdminClient();
     const { data: job, error: jobErr } = await admin
       .from("jobs")
-      .select("id, worker_id, status")
+      .select("id, homeowner_id, worker_id, status")
       .eq("id", id)
       .single();
 
     if (jobErr || !job) {
       return NextResponse.json({ error: "Job hindi mahanap." }, { status: 404 });
+    }
+
+    // Cancel: homeowner (open/matched) or worker (matched only)
+    if (status === "cancelled") {
+      if (!CANCEL_ALLOWED_STATUSES.includes(job.status as (typeof CANCEL_ALLOWED_STATUSES)[number])) {
+        return NextResponse.json(
+          { error: "Hindi na pwedeng i-cancel ang job na ito." },
+          { status: 400 }
+        );
+      }
+      const isHomeowner = job.homeowner_id === user.id;
+      const isWorker = job.worker_id === user.id;
+      if (isHomeowner && (job.status === "open" || job.status === "matched")) {
+        // ok
+      } else if (isWorker && job.status === "matched") {
+        // ok
+      } else {
+        return NextResponse.json(
+          { error: "Walang permiso para i-cancel." },
+          { status: 403 }
+        );
+      }
+      const { error: updateErr } = await admin
+        .from("jobs")
+        .update({ status: "cancelled" })
+        .eq("id", id);
+      if (updateErr) {
+        console.error("Job cancel error:", updateErr);
+        return NextResponse.json(
+          { error: "Hindi masave. Subukan muli." },
+          { status: 500 }
+        );
+      }
+      return NextResponse.json({ ok: true, status: "cancelled" });
+    }
+
+    // Worker status updates (in_progress, completed)
+    if (
+      !WORKER_ALLOWED_STATUSES.includes(status as (typeof WORKER_ALLOWED_STATUSES)[number])
+    ) {
+      return NextResponse.json(
+        { error: "Invalid status. Pwedeng in_progress, completed, o cancelled." },
+        { status: 400 }
+      );
     }
     if (job.worker_id !== user.id) {
       return NextResponse.json({ error: "Hindi mo pwedeng i-update ang job na ito." }, { status: 403 });
