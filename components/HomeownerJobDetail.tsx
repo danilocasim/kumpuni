@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { PageContainer } from "@/components/PageContainer";
 
 const STATUS_LABELS: Record<string, string> = {
-  open: "Naghahanap",
-  matched: "May Kumpunero",
+  open: "Bukas",
+  matched: "May Nahanap",
   in_progress: "Ginagawa",
   completed: "Tapos Na",
   cancelled: "Na-cancel",
@@ -112,27 +112,46 @@ export default function HomeownerJobDetail({
     <main className="min-h-screen page-bg py-6 sm:py-10">
       <PageContainer>
         {/* Header & Back Navigation */}
-        <div className="mb-6 space-y-3">
+        <div className="mb-6 space-y-4">
           <Link href="/dashboard" className="btn-ghost inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors pr-4 py-2 -ml-2 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             <span className="font-medium">Bumalik sa Dashboard</span>
           </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-              Detalye ng Trabaho
+          <div className="flex flex-col gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight line-clamp-2">
+              {job.description || "Detalye ng Trabaho"}
             </h1>
-            <span className="badge-status badge-this-week self-start sm:self-auto text-sm px-3 py-1.5 shadow-sm">
-              {STATUS_LABELS[job.status] ?? job.status}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-50 text-kumpuni-blue text-sm font-semibold border border-blue-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                {CATEGORY_LABELS[job.category] ?? job.category}
+              </span>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-bold uppercase tracking-widest border
+                ${job.status === 'open' ? 'bg-green-50 text-success-green border-green-100' :
+                  job.status === 'matched' ? 'bg-kumpuni-blue/10 text-kumpuni-blue border-kumpuni-blue/20' :
+                  job.status === 'completed' ? 'bg-gray-100 text-gray-700 border-gray-200' :
+                  'bg-orange-50 text-action-orange border-orange-100'}`}>
+                <span className={`w-2 h-2 rounded-full ${
+                  job.status === 'open' ? 'bg-success-green' :
+                  job.status === 'matched' ? 'bg-kumpuni-blue' :
+                  job.status === 'completed' ? 'bg-gray-400' : 'bg-action-orange'
+                }`}></span>
+                {STATUS_LABELS[job.status] ?? job.status}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Visual Progress/Status Tracker */}
-        <div className="card-kumpuni mb-6 p-5 sm:p-6 overflow-hidden">
-          <p className="text-xs font-bold text-text-tertiary mb-5 uppercase tracking-widest">Job Progress</p>
-          <div className="relative flex items-center justify-between sm:justify-start sm:gap-14">
+        <div className="card-kumpuni mb-6 p-5 sm:p-8 overflow-hidden">
+          <p className="text-sm font-bold text-text-tertiary mb-8 uppercase tracking-widest">Status ng Request</p>
+
+          <div className="relative flex items-start justify-between mx-auto px-0 mb-4 mt-2">
             {/* Connecting Line background */}
-            <div className="absolute top-1/2 left-0 w-full h-[3px] bg-surface-light -z-10 -translate-y-1/2 rounded-full hidden sm:block"></div>
+            <div className="absolute top-4 sm:top-5 left-[12.5%] right-[12.5%] h-[2px] bg-slate-200 z-0"></div>
+
+            {/* Active Connecting Line */}
+            <div className="absolute top-4 sm:top-5 left-[12.5%] h-[2px] bg-kumpuni-blue z-0 transition-all duration-500 ease-in-out" style={{ width: `${(Math.max(0, currentStepIndex) / (statusSteps.length - 1)) * 75}%` }}></div>
 
             {statusSteps.map((step, i) => {
               const done = isCancelled
@@ -141,33 +160,56 @@ export default function HomeownerJobDetail({
               const isCurrent = i === currentStepIndex && !isCancelled;
 
               return (
-                <div key={step} className="flex flex-col items-center gap-2 bg-white relative z-10 sm:px-2 z-10 transition-all duration-300">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm
-                    ${done && !isCurrent ? "bg-kumpuni-blue text-white" :
-                      isCurrent && !isCancelled ? "bg-white border-2 border-kumpuni-blue text-kumpuni-blue shadow-md scale-110" :
-                      "bg-surface-light text-text-tertiary border border-border-subtle"}`}
+                <div key={step} className="flex flex-col items-center gap-3 relative z-10 px-0 sm:px-2 transition-all duration-300 w-1/4">
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300
+                    ${(done || isCurrent) ? "bg-white border-[2.5px] border-kumpuni-blue text-kumpuni-blue shadow-sm" :
+                      "bg-white text-slate-300 border-[2px] border-slate-200"}`}
                   >
-                    {done && !isCurrent ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    {(done && !isCurrent) ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-kumpuni-blue"><path d="M20 6 9 17l-5-5"/></svg>
                     ) : (
-                      i + 1
+                      <span className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${isCurrent ? 'bg-kumpuni-blue' : 'bg-slate-200'}`}></span>
                     )}
                   </div>
-                  <span className={`text-[11px] sm:text-sm font-semibold tracking-wide
-                    ${isCurrent ? "text-kumpuni-blue" : done ? "text-text-primary" : "text-text-tertiary"}`}>
-                    {step === "open" && "Naghahanap"}
-                    {step === "matched" && "Na-match"}
-                    {step === "in_progress" && "Ginagawa"}
-                    {step === "completed" && "Tapos Na"}
+                  <span className={`text-[11px] sm:text-sm font-bold text-center
+                    ${isCurrent ? "text-kumpuni-blue" : "text-slate-500"}`}>
+                    {STATUS_LABELS[step] ?? step}
                   </span>
                 </div>
               );
             })}
           </div>
+
+          {isOpen && isFlexible && (
+            <div className="mt-4 p-4 sm:p-5 bg-blue-50/50 rounded-xl flex items-start gap-4 text-kumpuni-blue text-sm sm:text-base border border-blue-100/50">
+              <div className="mt-0.5 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </div>
+              <p className="leading-relaxed text-text-secondary">
+                <strong className="text-kumpuni-blue">Kasalukuyang naghahanap.</strong> Ang iyong job post ay bukas pa. Maaari mo nang tingnan ang mga worker sa iyong lugar na pwede mong imbitahan para mas mapabilis ang pag-match.
+              </p>
+            </div>
+          )}
+
+          {isOpen && isFast && (
+            <div className="mt-4 p-4 sm:p-5 bg-orange-50/50 rounded-xl flex items-start gap-4 text-action-orange text-sm sm:text-base border border-orange-100/50">
+              <div className="mt-0.5 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <p className="leading-relaxed text-text-secondary">
+                <strong className="text-action-orange">Naghahanap na ng Worker.</strong> Awtomatikong nag-no-notify ang system sa mga available na worker. Hintayin ang kanilang pag-accept.
+              </p>
+            </div>
+          )}
+
           {isCancelled && (
-            <div className="mt-4 p-3 bg-danger-light rounded-md flex items-center gap-2 text-danger-red text-sm font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              This job was cancelled.
+            <div className="mt-4 p-4 sm:p-5 bg-danger-light rounded-xl flex items-start gap-4 text-danger-red text-sm sm:text-base border border-danger-red/20">
+              <div className="mt-0.5 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+              <p className="font-semibold text-danger-red">
+                Ang request na ito ay na-cancel na.
+              </p>
             </div>
           )}
         </div>
