@@ -47,11 +47,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid urgency." }, { status: 400 });
     }
 
-    const matchingMode = urgency === "asap" ? "fast" : "flexible";
-    const fastMatchExpiresAt =
-      urgency === "asap"
-        ? new Date(Date.now() + 15 * 60 * 1000).toISOString()
-        : null;
+    const matchingMode = "fast";
+
+    // Expiration based on urgency
+    const expiryMs: Record<string, number> = {
+      asap: 15 * 60 * 1000,           // 15 minutes
+      this_week: 7 * 24 * 60 * 60 * 1000,  // 7 days
+      flexible: 30 * 24 * 60 * 60 * 1000,  // 30 days
+    };
+    const fastMatchExpiresAt = new Date(
+      Date.now() + (expiryMs[urgency] ?? expiryMs.flexible)
+    ).toISOString();
 
     const locationWkt = `POINT(${lng} ${lat})`;
     const barangayStr = typeof barangay === "string" && barangay.trim() ? barangay.trim() : "N/A";
@@ -96,17 +102,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: message }, { status: 500 });
     }
 
-    if (urgency === "asap") {
-      notifyFastMatchWorkers({
-        jobId: job.id,
-        category,
-        barangay: barangayStr,
-        budgetRange: budget_range || null,
-      }).then(({ notified, errors }) => {
-        if (errors.length) console.warn("Fast Match notify:", errors);
-        else if (notified) console.info("Fast Match: notified", notified, "workers");
-      });
-    }
+    // Notify nearby workers for all urgency levels
+    notifyFastMatchWorkers({
+      jobId: job.id,
+      category,
+      barangay: barangayStr,
+      budgetRange: budget_range || null,
+    }).then(({ notified, errors }) => {
+      if (errors.length) console.warn("Fast Match notify:", errors);
+      else if (notified) console.info("Fast Match: notified", notified, "workers");
+    });
 
     return NextResponse.json({ id: job.id });
   } catch (err) {

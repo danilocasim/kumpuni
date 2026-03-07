@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { Nav } from "@/components/Nav";
+import { AuthSyncProvider } from "@/components/AuthSyncProvider";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -51,10 +52,12 @@ export default async function RootLayout({
   return (
     <html lang="tl" className={`${plusJakarta.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased min-h-screen page-bg">
-        <Nav userRole={userRole} isAuthenticated={!!user} />
-        <div className="mb-20 lg:mb-0">
-          {children}
-        </div>
+        <AuthSyncProvider>
+          <Nav userRole={userRole} isAuthenticated={!!user} />
+          <div className="mb-20 lg:mb-0">
+            {children}
+          </div>
+        </AuthSyncProvider>
       </body>
     </html>
   );

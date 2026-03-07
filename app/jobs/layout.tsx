@@ -13,7 +13,9 @@ export default async function JobsLayout({
 }) {
   const supabase = await createClient();
   const { user, role } = await getSessionRole(supabase);
+  console.log(`[JobsLayout] user=${user?.id ?? "null"} role="${role}"`);
   if (user && !canUseHomeownerFeatures(role)) {
+    console.error(`[JobsLayout] Blocking user ${user.id} — role="${role}"`);
     redirect("/worker/dashboard?message=homeowner_only");
   }
   return <>{children}</>;

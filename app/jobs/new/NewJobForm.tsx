@@ -1,54 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LocationPicker, type LocationValue } from "@/components/LocationPicker";
-import { JobPhotoUpload, type JobPhotoFile } from "@/components/JobPhotoUpload";
+import imageCompression from "browser-image-compression";
 
 const CATEGORIES = [
-  { value: "plumbing", label: "Plumbing (Tubero)" },
-  { value: "electrical", label: "Electrical (Elektrisyan)" },
-  { value: "carpentry", label: "Carpentry (Karpintero)" },
-  { value: "painting", label: "Painting (Pintor)" },
-  { value: "masonry", label: "Masonry (Mason)" },
-  { value: "general", label: "General Repair (Iba pa)" },
+  { value: "plumbing", label: "Plumbing (Tubero)", icon: "🔧" },
+  { value: "electrical", label: "Electrical (Elektrisyan)", icon: "⚡" },
+  { value: "carpentry", label: "Carpentry (Karpintero)", icon: "🪚" },
+  { value: "painting", label: "Painting (Pintor)", icon: "🎨" },
+  { value: "masonry", label: "Masonry (Mason)", icon: "🧱" },
+  { value: "general", label: "General Repair (Iba pa)", icon: "🛠️" },
 ];
 
 const URGENCY_OPTIONS = [
-  { value: "asap", label: "Ngayon Din / ASAP" },
-  { value: "this_week", label: "Ngayong Linggo" },
-  { value: "flexible", label: "Flexible / Walang Minamadali" },
+  { value: "asap", label: "Ngayon Din / ASAP", sub: "Fast match — mai-alerto agad ang mga kumpunero" },
+  { value: "this_week", label: "Ngayong Linggo", sub: "Pumili ka ng kumpunero sa listahan" },
+  { value: "flexible", label: "Kahit Kailan", sub: "Walang rush, maghanap ng pinaka-magaling" },
 ];
 
-const BUDGET_OPTIONS = [
-  { value: "under_1k", label: "Pababa ng ₱1,000" },
-  { value: "1k_3k", label: "₱1,000 – ₱3,000" },
-  { value: "3k_5k", label: "₱3,000 – ₱5,000" },
-  { value: "5k_10k", label: "₱5,000 – ₱10,000" },
-  { value: "10k_plus", label: "₱10,000+" },
-  { value: "not_sure", label: "Hindi pa sigurado" },
-];
+type AIAnalysis = {
+  category: string;
+  title: string;
+  description: string;
+  urgency: string;
+  estimatedCost: { min: number; max: number };
+  confidence: number;
+};
+
+type Step = "capture" | "analyzing" | "review" | "location" | "submitting";
 
 export default function NewJobForm() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Photo state
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [userNote, setUserNote] = useState("");
+
+  // AI analysis state
+  const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+
+  // Editable fields (populated by AI, tweakable by user)
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState<LocationValue | null>(null);
-  const [photos, setPhotos] = useState<JobPhotoFile[]>([]);
   const [urgency, setUrgency] = useState("this_week");
-  const [budget, setBudget] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Location & submit
+  const [location, setLocation] = useState<LocationValue | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Flow step
+  const [step, setStep] = useState<Step>("capture");
+
+  // ─── Photo Capture ────────────────────────────────────────
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      });
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setPhotoPreview(dataUrl);
+        setPhotoFile(compressed);
+      };
+      reader.readAsDataURL(compressed);
+    } catch {
+      setAnalyzeError("Hindi ma-process ang litrato. Subukan ulit.");
+    }
+    e.target.value = "";
+  }, []);
+
+  // ─── AI Analysis ──────────────────────────────────────────
+  async function analyzePhoto(imageBase64: string, note: string) {
+    setStep("analyzing");
+    setAnalyzeError(null);
+    try {
+      const res = await fetch("/api/jobs/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imageBase64, note: note.trim() || undefined }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Analysis failed.");
+
+      setAnalysis(data);
+      setCategory(data.category);
+      setDescription(data.description);
+      setUrgency(data.urgency);
+      setStep("review");
+    } catch (err) {
+      setAnalyzeError(err instanceof Error ? err.message : "Hindi ma-analyze. Subukan ulit.");
+      setStep("capture");
+    }
+  }
+
+  function retakePhoto() {
+    setPhotoPreview(null);
+    setPhotoFile(null);
+    setAnalysis(null);
+    setAnalyzeError(null);
+    setUserNote("");
+    setStep("capture");
+  }
+
+  // ─── Submit Job ───────────────────────────────────────────
+  async function handleSubmit() {
     if (!location) {
-      setError("Please select a location.");
+      setSubmitError("Pumili muna ng lokasyon.");
       return;
     }
     setSubmitting(true);
-    setError(null);
+    setSubmitError(null);
+    setStep("submitting");
+
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -57,19 +134,28 @@ export default function NewJobForm() {
         return;
       }
 
+      // Upload photo
       const photoUrls: string[] = [];
-      if (photos.length > 0) {
-        const prefix = `${user.id}/${Date.now()}`;
-        for (let i = 0; i < photos.length; i++) {
-          const ext = photos[i].file.name.split(".").pop() || "jpg";
-          const path = `${prefix}_${i}.${ext}`;
-          const { error: uploadErr } = await supabase.storage
-            .from("jobs")
-            .upload(path, photos[i].file, { upsert: false });
-          if (uploadErr) throw uploadErr;
-          const { data: urlData } = supabase.storage.from("jobs").getPublicUrl(path);
-          photoUrls.push(urlData.publicUrl);
-        }
+      if (photoFile) {
+        const ext = photoFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/${Date.now()}_0.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("jobs")
+          .upload(path, photoFile, { upsert: false });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("jobs").getPublicUrl(path);
+        photoUrls.push(urlData.publicUrl);
+      }
+
+      // Determine budget range string from AI estimate
+      let budgetRange: string | null = null;
+      if (analysis?.estimatedCost) {
+        const { min, max } = analysis.estimatedCost;
+        if (max <= 1000) budgetRange = "under_1k";
+        else if (max <= 3000) budgetRange = "1k_3k";
+        else if (max <= 5000) budgetRange = "3k_5k";
+        else if (max <= 10000) budgetRange = "5k_10k";
+        else budgetRange = "10k_plus";
       }
 
       const res = await fetch("/api/jobs", {
@@ -83,185 +169,442 @@ export default function NewJobForm() {
           lng: location.lng,
           barangay: location.barangay,
           urgency,
-          budget_range: budget || null,
+          budget_range: budgetRange,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not save job.");
+      if (!res.ok) throw new Error(data.error || "Hindi masave ang job.");
 
-      if (urgency === "asap") {
-        router.push(`/jobs/${data.id}/fast`);
-      } else {
-        router.push(`/jobs/${data.id}/browse`);
-      }
+      router.push(`/jobs/${data.id}/fast`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+      setSubmitError(err instanceof Error ? err.message : "May error. Subukan ulit.");
+      setStep("location");
     } finally {
       setSubmitting(false);
     }
   }
 
+  // ─── Format peso ──────────────────────────────────────────
+  function formatPeso(n: number) {
+    return `₱${n.toLocaleString("en-PH")}`;
+  }
+
+  const getCategoryLabel = (val: string) => CATEGORIES.find((c) => c.value === val)?.label ?? val;
+  const getCategoryIcon = (val: string) => CATEGORIES.find((c) => c.value === val)?.icon ?? "🛠️";
+
+  // ─── Step indicator ───────────────────────────────────────
+  const stepLabels = ["Litrato", "Suriin", "Lokasyon", "I-post"];
+  const stepIndex =
+    step === "capture" ? 0 :
+    step === "analyzing" ? 0 :
+    step === "review" ? 1 :
+    step === "location" ? 2 :
+    3;
+
   return (
-    <div className="max-w-xl mx-auto py-8">
-      <div className="mb-8 text-center pb-6 border-b border-subtle">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
+    <div className="max-w-xl mx-auto py-6 sm:py-8">
+
+      {/* Header */}
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
           Mag-post ng Trabaho
         </h1>
-        <p className="text-text-secondary mt-2">Ibigay ang detalye ng kailangang gawin para makahanap ng tamang kumpunero.</p>
+        <p className="text-sm text-text-secondary mt-1">
+          Kunan ng litrato — ipa-analyze sa AI — i-post agad
+        </p>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="card-kumpuni p-6 sm:p-8 space-y-6 bg-gradient-to-br from-white to-surface-light border-2 border-kumpuni-blue/20">
 
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b border-subtle">
-             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-kumpuni-blue font-bold">1</div>
-             <h2 className="text-xl font-bold text-text-primary">Detalye ng Trabaho</h2>
-          </div>
-
-          <div>
-            <label htmlFor="category" className="label-kumpuni font-bold mb-2 block text-base flex items-center gap-2">
-              Kategorya
-            </label>
-            <div className="relative">
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                required
-                className="input-kumpuni appearance-none cursor-pointer pr-10 py-3 shadow-inner bg-white border-2 focus:border-kumpuni-blue font-medium"
-              >
-                <option value="" disabled>Pumili ng kategorya...</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-kumpuni-blue">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      {/* Step Progress */}
+      <div className="flex items-center justify-center gap-0 mb-8 px-4">
+        {stepLabels.map((label, i) => (
+          <div key={label} className="flex items-center">
+            <div className="flex flex-col items-center gap-1.5">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300
+                ${i < stepIndex ? "bg-kumpuni-blue text-white" :
+                  i === stepIndex ? "bg-white border-2 border-kumpuni-blue text-kumpuni-blue shadow-sm" :
+                  "bg-gray-100 text-gray-400 border border-gray-200"}`}>
+                {i < stepIndex ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                ) : (
+                  i + 1
+                )}
               </div>
+              <span className={`text-[11px] font-bold ${i <= stepIndex ? "text-kumpuni-blue" : "text-gray-400"}`}>
+                {label}
+              </span>
             </div>
+            {i < stepLabels.length - 1 && (
+              <div className={`w-8 sm:w-12 h-[2px] mx-1 mb-5 transition-colors duration-300 ${i < stepIndex ? "bg-kumpuni-blue" : "bg-gray-200"}`} />
+            )}
           </div>
+        ))}
+      </div>
 
-          <div>
-            <label htmlFor="description" className="label-kumpuni flex justify-between font-bold mb-2">
-              <span className="text-base flex items-center gap-2">Deskripsyon</span>
-              <span className="font-normal text-text-tertiary text-xs bg-surface-light px-2 py-0.5 rounded-md">Max 500 chars</span>
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={500}
-              required
-              rows={4}
-              placeholder="Ilarawan nang maayos ang kailangang gawin (Hal: 'Kailangan ng mag-aayos ng tubong tumutulo sa ilalim ng lababo')"
-              className="input-kumpuni py-3 resize-y shadow-inner border-2 focus:border-kumpuni-blue"
-            />
-            <p className="text-xs font-medium text-text-tertiary mt-2 text-right">{description.length}/500</p>
-          </div>
-
-          <div>
-            <label className="label-kumpuni font-bold mb-2 block text-base">Mga Litrato <span className="text-sm font-normal text-text-secondary">(Opsyonal)</span></label>
-            <JobPhotoUpload value={photos} onChange={setPhotos} />
-            <p className="text-sm mt-2 text-text-secondary">Mas madaling makahanap ng kumpunero kapag may malinaw na litrato ang sirang aayusin.</p>
-          </div>
-
-          <div className="pt-6 mt-2 border-t border-subtle border-dashed">
-            <label className="label-kumpuni font-bold mb-2 block text-base flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-danger-red"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-              Lokasyon ng Trabaho
-            </label>
-            <LocationPicker value={location} onChange={setLocation} />
-          </div>
-        </div>
-
-        <div className="card-kumpuni p-6 sm:p-8 space-y-6 shadow-sm border border-subtle">
-           <div className="flex items-center gap-3 mb-6 pb-2 border-b border-subtle">
-             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-kumpuni-blue font-bold">2</div>
-             <h2 className="text-xl font-bold text-text-primary">Matching Preferences</h2>
-          </div>
-
-          <div>
-            <label htmlFor="urgency" className="label-kumpuni font-bold mb-2 block text-base flex items-center gap-2">
-              Kailan dapat gawin?
-            </label>
-            <div className="relative">
-              <select
-                id="urgency"
-                value={urgency}
-                onChange={(e) => setUrgency(e.target.value)}
-                className="input-kumpuni appearance-none cursor-pointer pr-10 py-3 bg-white"
-              >
-                {URGENCY_OPTIONS.map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {u.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-text-tertiary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </div>
+      {/* ═══════════ STEP 1: Capture Photo ═══════════ */}
+      {step === "capture" && (
+        <div className="space-y-4">
+          <div className="card-kumpuni p-6 sm:p-8 text-center space-y-5">
+            <div className="w-20 h-20 rounded-3xl bg-blue-50 mx-auto flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-kumpuni-blue">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
             </div>
-            {urgency === "asap" && (
-              <p className="text-sm font-medium text-action-orange mt-2 flex items-start gap-1 bg-orange-50 p-2 rounded-md border border-warning-light">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-                Ang pagpili ng &quot;Ngayon Din&quot; ay awtomatikong gagamit ng Fast Match para ma-alerto agad ang mga malapit na kumpunero.
+
+            <div>
+              <h2 className="text-xl font-extrabold text-text-primary mb-2">
+                Kunan ng Litrato ang Problema
+              </h2>
+              <p className="text-sm text-text-secondary leading-relaxed max-w-sm mx-auto">
+                I-photo ang sirang tubo, saksakan, dingding, o anumang kailangang kumpunihin. Ipa-analyze ng AI para mas mabilis ang pag-post.
               </p>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              onChange={handleFileSelect}
+              className="sr-only"
+            />
+
+            {!photoPreview ? (
+              /* No photo yet — show camera button */
+              <>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="btn-primary flex-1 py-4 text-base flex items-center justify-center gap-2.5 shadow-lg"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                      <circle cx="12" cy="13" r="3"/>
+                    </svg>
+                    Kumuha o Pumili ng Litrato
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setStep("review"); setAnalysis(null); }}
+                  className="btn-ghost text-sm text-text-tertiary"
+                >
+                  O mag-type nang manu-mano →
+                </button>
+              </>
+            ) : (
+              /* Photo taken — show preview + optional note + analyze button */
+              <>
+                <div className="relative mx-auto w-full max-w-[280px] rounded-2xl overflow-hidden shadow-md border-2 border-kumpuni-blue/30">
+                  <img src={photoPreview} alt="Preview" className="w-full aspect-[4/3] object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => { setPhotoPreview(null); setPhotoFile(null); }}
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                    aria-label="Remove photo"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </div>
+
+                <div className="text-left w-full">
+                  <label htmlFor="userNote" className="text-sm font-bold text-text-primary mb-1.5 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-kumpuni-blue"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Idagdag ang detalye
+                    <span className="font-normal text-text-tertiary text-xs">(opsyonal)</span>
+                  </label>
+                  <textarea
+                    id="userNote"
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    maxLength={200}
+                    rows={2}
+                    placeholder='Hal: "Gusto kong magdagdag ng outlet sa pader na ito" o "Tumutulo lang kapag umuulan"'
+                    className="input-kumpuni py-2.5 resize-none border-2 focus:border-kumpuni-blue text-sm"
+                  />
+                  <p className="text-xs text-text-tertiary mt-1">Makakatulong ito sa AI na mas maintindihan kung anong gusto mong gawin.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => analyzePhoto(photoPreview!, userNote)}
+                  className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2.5 shadow-lg"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72z"/><path d="m14 7 3 3"/></svg>
+                  I-analyze ng AI
+                </button>
+              </>
             )}
           </div>
 
-          <div>
-            <label htmlFor="budget" className="label-kumpuni font-bold mb-2 block text-base flex justify-between items-center">
-              <span>Estimated na Budget</span>
-              <span className="text-sm font-normal text-text-secondary">(Opsyonal)</span>
-            </label>
-            <div className="relative">
-              <select
-                id="budget"
-                value={budget}
-                onChange={(e) => setBudget(e.target.value)}
-                className="input-kumpuni appearance-none cursor-pointer pr-10 py-3 bg-white"
-              >
-                <option value="" disabled>Pumili ng inaasahang budget...</option>
-                {BUDGET_OPTIONS.map((b) => (
-                  <option key={b.value} value={b.value}>
-                    {b.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-text-tertiary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          {analyzeError && (
+            <div className="p-4 bg-danger-light border border-danger-red/20 rounded-xl flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-red shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div>
+                <p className="text-sm font-bold text-danger-red">{analyzeError}</p>
+                <p className="text-xs text-text-secondary mt-1">Pwede mong subukang kumuha ulit ng litrato o mag-type nang manu-mano.</p>
               </div>
             </div>
-            <p className="text-sm text-text-secondary mt-2">Ito ay basehan lamang at maaari pang makipag-negosasyon mismo sa kumpunero.</p>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════ STEP 1.5: Analyzing ═══════════ */}
+      {step === "analyzing" && (
+        <div className="card-kumpuni p-8 sm:p-10 text-center space-y-6">
+          {photoPreview && (
+            <div className="relative mx-auto w-full max-w-[240px] rounded-2xl overflow-hidden shadow-md border-2 border-kumpuni-blue/30">
+              <img src={photoPreview} alt="Analyzing" className="w-full aspect-[4/3] object-cover" />
+              <div className="absolute inset-0 bg-kumpuni-blue/10 backdrop-blur-[1px] flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                  <svg className="animate-spin h-8 w-8 text-kumpuni-blue" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
+          <div>
+            <h2 className="text-xl font-extrabold text-text-primary mb-2">Ina-analyze ng AI...</h2>
+            <p className="text-sm text-text-secondary">Tinitingnan ang litrato para malaman kung anong kailangan ayusin at magkano ang magiging gastos.</p>
+          </div>
+          <div className="flex justify-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-kumpuni-blue animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-kumpuni-blue animate-bounce" style={{ animationDelay: "150ms" }} />
+            <div className="w-2.5 h-2.5 rounded-full bg-kumpuni-blue animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
         </div>
+      )}
 
-        {error && (
-          <div className="p-4 bg-danger-light border border-danger-red/30 rounded-xl flex gap-2 items-start shadow-sm">
-             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-danger-red shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-            <p className="text-sm font-bold text-danger-red" role="alert">
-              {error}
-            </p>
+      {/* ═══════════ STEP 2: Review AI Analysis ═══════════ */}
+      {step === "review" && (
+        <div className="space-y-4">
+          {/* AI Results Banner */}
+          {analysis && (
+            <div className="card-kumpuni border-kumpuni-blue/30 border-2 bg-gradient-to-br from-blue-50/80 to-white p-5 sm:p-6 space-y-4 relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 text-kumpuni-blue/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg>
+              </div>
+              <div className="flex items-center gap-2 text-kumpuni-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72z"/><path d="m14 7 3 3"/></svg>
+                <span className="text-sm font-extrabold uppercase tracking-widest">AI Analysis</span>
+                {analysis.confidence >= 70 && (
+                  <span className="ml-auto bg-green-100 text-success-green text-xs font-bold px-2 py-0.5 rounded-md">
+                    {analysis.confidence}% confident
+                  </span>
+                )}
+                {analysis.confidence < 70 && analysis.confidence >= 40 && (
+                  <span className="ml-auto bg-orange-100 text-action-orange text-xs font-bold px-2 py-0.5 rounded-md">
+                    {analysis.confidence}% confident
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-start gap-4">
+                {photoPreview && (
+                  <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-subtle shadow-sm">
+                    <img src={photoPreview} alt="" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-extrabold text-text-primary leading-snug mb-1">
+                    {analysis.title}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-text-secondary">
+                    <span>{getCategoryIcon(analysis.category)}</span>
+                    <span className="font-semibold">{getCategoryLabel(analysis.category)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cost estimate */}
+              <div className="bg-white rounded-xl p-4 border border-subtle flex items-center gap-4">
+                <div className="w-11 h-11 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-success-green"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Estimated na Gastos</p>
+                  <p className="text-xl font-extrabold text-text-primary">
+                    {formatPeso(analysis.estimatedCost.min)} – {formatPeso(analysis.estimatedCost.max)}
+                  </p>
+                  <p className="text-xs text-text-tertiary mt-0.5">Tantyang presyo lang — pag-uusapan pa sa kumpunero</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Editable Form Fields */}
+          <div className="card-kumpuni p-5 sm:p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-text-primary">
+                {analysis ? "I-review at i-edit kung kailangan" : "Isulat ang detalye"}
+              </h3>
+              {analysis && (
+                <button type="button" onClick={retakePhoto} className="text-xs font-bold text-kumpuni-blue hover:underline">
+                  Ibang litrato
+                </button>
+              )}
+            </div>
+
+            {/* Category */}
+            <div>
+              <label htmlFor="category" className="text-sm font-bold text-text-primary mb-1.5 block">Kategorya</label>
+              <div className="grid grid-cols-3 gap-2">
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCategory(c.value)}
+                    className={`p-3 rounded-xl border-2 text-center transition-all duration-150 ${
+                      category === c.value
+                        ? "border-kumpuni-blue bg-blue-50 shadow-sm"
+                        : "border-gray-100 bg-white hover:border-gray-200"
+                    }`}
+                  >
+                    <span className="text-2xl block mb-1">{c.icon}</span>
+                    <span className={`text-xs font-bold block ${category === c.value ? "text-kumpuni-blue" : "text-text-secondary"}`}>
+                      {c.label.split(" (")[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="text-sm font-bold text-text-primary mb-1.5 flex justify-between">
+                <span>Deskripsyon ng Problema</span>
+                <span className="font-normal text-text-tertiary text-xs">{description.length}/500</span>
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={500}
+                required
+                rows={3}
+                placeholder="Ilarawan ang kailangang ayusin..."
+                className="input-kumpuni py-3 resize-y border-2 focus:border-kumpuni-blue"
+              />
+            </div>
+
+            {/* Urgency */}
+            <div>
+              <label className="text-sm font-bold text-text-primary mb-2 block">Kailan dapat gawin?</label>
+              <div className="space-y-2">
+                {URGENCY_OPTIONS.map((u) => (
+                  <button
+                    key={u.value}
+                    type="button"
+                    onClick={() => setUrgency(u.value)}
+                    className={`w-full p-3.5 rounded-xl border-2 text-left transition-all duration-150 flex items-center gap-3 ${
+                      urgency === u.value
+                        ? "border-kumpuni-blue bg-blue-50/50"
+                        : "border-gray-100 bg-white hover:border-gray-200"
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                      urgency === u.value ? "border-kumpuni-blue" : "border-gray-300"
+                    }`}>
+                      {urgency === u.value && <div className="w-2.5 h-2.5 rounded-full bg-kumpuni-blue" />}
+                    </div>
+                    <div>
+                      <span className={`text-sm font-bold block ${urgency === u.value ? "text-kumpuni-blue" : "text-text-primary"}`}>{u.label}</span>
+                      <span className="text-xs text-text-tertiary">{u.sub}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="btn-primary w-full shadow-lg text-lg py-4 flex items-center justify-center gap-2 hover:-translate-y-1 transition-transform"
-        >
-          {submitting ? (
-            <span className="flex items-center gap-2">
-               <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-               </svg>
-               SINE-SAVE...
-            </span>
-          ) : "I-POST ANG TRABAHO"}
-        </button>
-      </form>
+          {/* Next Step Button */}
+          <button
+            type="button"
+            onClick={() => setStep("location")}
+            disabled={!category || !description.trim()}
+            className="btn-primary w-full py-4 text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            Magpatuloy — Pumili ng Lokasyon
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      )}
+
+      {/* ═══════════ STEP 3: Location ═══════════ */}
+      {(step === "location" || step === "submitting") && (
+        <div className="space-y-4">
+          {/* Summary banner */}
+          <div className="card-kumpuni p-4 flex items-center gap-3 bg-surface-light">
+            {photoPreview && (
+              <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-subtle">
+                <img src={photoPreview} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-text-primary truncate">
+                {getCategoryIcon(category)} {getCategoryLabel(category)}
+              </p>
+              <p className="text-xs text-text-secondary truncate">{description.slice(0, 60)}...</p>
+            </div>
+            <button type="button" onClick={() => setStep("review")} className="text-xs font-bold text-kumpuni-blue hover:underline shrink-0">
+              I-edit
+            </button>
+          </div>
+
+          <div className="card-kumpuni p-5 sm:p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-danger-red"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <h3 className="text-base font-extrabold text-text-primary">Saan ang lokasyon ng trabaho?</h3>
+            </div>
+            <LocationPicker value={location} onChange={setLocation} />
+          </div>
+
+          {/* Cost Estimate Reminder */}
+          {analysis?.estimatedCost && (
+            <div className="card-kumpuni p-4 bg-green-50/50 border-success-green/20 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-success-green"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-text-primary">
+                  Estimated: {formatPeso(analysis.estimatedCost.min)} – {formatPeso(analysis.estimatedCost.max)}
+                </p>
+                <p className="text-xs text-text-tertiary">Tantyahin lang — ang kumpunero ang magbibigay ng final na presyo</p>
+              </div>
+            </div>
+          )}
+
+          {submitError && (
+            <div className="p-3 bg-danger-light border border-danger-red/20 rounded-xl flex items-start gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-red shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p className="text-sm font-bold text-danger-red">{submitError}</p>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting || !location}
+            className="btn-primary w-full py-4 text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {submitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Sine-save...
+              </span>
+            ) : (
+              <>
+                I-POST ANG TRABAHO
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
