@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Briefcase, PlusCircle, User, HelpCircle } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { Home, Briefcase, PlusCircle, User, HelpCircle, LogOut } from "lucide-react";
 
 type UserRole = "homeowner" | "worker" | "both" | null;
 
@@ -57,6 +58,20 @@ function DesktopNavLink({
 
 export function Nav({ userRole, isAuthenticated }: NavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      router.push("/");
+      router.refresh();
+    } finally {
+      setLoggingOut(false);
+    }
+  }
 
   if (!isAuthenticated) {
     return (
@@ -68,7 +83,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
           >
             Kumpuni
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/how-it-works"
               className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
@@ -76,7 +91,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
               Paano Gumagana?
             </Link>
             <Link
-              href="/login?role=homeowner&next=/jobs/new"
+              href="/login"
               className="px-5 py-2 font-bold text-sm bg-action-orange text-white rounded-md hover:bg-opacity-90 transition-colors shadow-sm"
             >
               LOG IN
@@ -108,7 +123,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             {showHomeowner && (
               <DesktopNavLink
                 href="/dashboard"
-                active={pathname === "/dashboard" || (pathname?.startsWith("/jobs/") && !pathname?.startsWith("/jobs/new"))}
+                active={pathname === "/dashboard" || ((pathname?.startsWith("/jobs/") ?? false) && !(pathname?.startsWith("/jobs/new") ?? false))}
               >
                 Mga Pinapagawa
               </DesktopNavLink>
@@ -132,6 +147,15 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             >
               Profile
             </DesktopNavLink>
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="px-3 py-1 text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" strokeWidth={2.5} />
+              {loggingOut ? "..." : "Logout"}
+            </button>
           </nav>
         </div>
       </header>
@@ -149,7 +173,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
           <NavLink
             href="/dashboard"
             active={
-              pathname === "/dashboard" || (pathname?.startsWith("/jobs/") && !pathname?.startsWith("/jobs/new"))
+              pathname === "/dashboard" || ((pathname?.startsWith("/jobs/") ?? false) && !(pathname?.startsWith("/jobs/new") ?? false))
             }
           >
             <Briefcase className="h-5 w-5" strokeWidth={2.5} />
@@ -180,6 +204,15 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
           <User className="h-5 w-5" strokeWidth={2.5} />
           Profile
         </NavLink>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="min-h-touch flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors text-text-tertiary disabled:opacity-50"
+        >
+          <LogOut className="h-5 w-5" strokeWidth={2.5} />
+          {loggingOut ? "..." : "Logout"}
+        </button>
       </nav>
     </>
   );
