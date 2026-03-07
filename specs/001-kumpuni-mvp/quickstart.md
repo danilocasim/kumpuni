@@ -9,7 +9,7 @@
 - Node 18+
 - pnpm or npm
 - Supabase project
-- Twilio (Phone OTP + all SMS for worker alerts). Maps use Leaflet + OSM (no map API key required).
+- Twilio (Phone OTP + all SMS for worker alerts). Maps use Leaflet + CartoDB Voyager tiles (no map API key required).
 
 ---
 
@@ -37,7 +37,7 @@ TWILIO_PHONE_NUMBER=+...
 
 # All SMS (OTP + worker alerts) use Twilio above.
 
-# Maps: Leaflet + OSM tiles (no key required). Optional: other tile URL if needed.
+# Maps: Leaflet + CartoDB Voyager tiles (no key required). Optional: other tile URL if needed.
 ```
 
 ---

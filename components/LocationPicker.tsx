@@ -47,6 +47,53 @@ const METRO_MANILA_BARANGAYS = [
   "Other (manual)",
 ];
 
+/** Approximate center coordinates for Metro Manila barangays (for moving the marker on select). */
+const BARANGAY_COORDINATES: Record<string, [number, number]> = {
+  "Bagong Silangan": [14.7172, 121.111],
+  Commonwealth: [14.7039, 121.0782],
+  Diliman: [14.6332, 121.0442],
+  "Holy Spirit": [14.6689, 121.0508],
+  Novaliches: [14.7139, 121.0489],
+  "Project 4": [14.6181, 121.0514],
+  "Quezon City (select)": [14.6508, 121.0499],
+  "San Antonio": [14.5847, 121.0772],
+  "Sikatuna Village": [14.6292, 121.0414],
+  "Ugong Norte": [14.6022, 121.0564],
+  Kapitolyo: [14.5764, 121.0633],
+  Ortigas: [14.5872, 121.0564],
+  "Pasig (select)": [14.5764, 121.0851],
+  "San Miguel": [14.5995, 120.9842],
+  Sagad: [14.5719, 121.0914],
+};
+
+/** Max distance (km) from a barangay center to still assign that barangay when user picks on map. */
+const NEAREST_BARANGAY_KM = 10;
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/** Returns the nearest barangay name for a point, or "Other (manual)" if none within threshold. */
+function nearestBarangayFor(lat: number, lng: number): string {
+  let nearest = "Other (manual)";
+  let minKm = NEAREST_BARANGAY_KM;
+  for (const [name, [blat, blng]] of Object.entries(BARANGAY_COORDINATES)) {
+    const km = haversineKm(lat, lng, blat, blng);
+    if (km < minKm) {
+      minKm = km;
+      nearest = name;
+    }
+  }
+  return nearest;
+}
+
 export interface LocationValue {
   lat: number;
   lng: number;
@@ -88,17 +135,26 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
+      const resolvedBarangay = nearestBarangayFor(lat, lng);
       setCenter([lat, lng]);
-      onChange({ lat, lng, barangay: barangay || "Other (manual)" });
+      setBarangay(resolvedBarangay);
+      onChange({ lat, lng, barangay: resolvedBarangay });
     },
-    [barangay, onChange]
+    [onChange]
   );
 
   const handleBarangayChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const v = e.target.value;
       setBarangay(v);
-      if (value) onChange({ ...value, barangay: v });
+      const coords = BARANGAY_COORDINATES[v];
+      if (coords) {
+        const [lat, lng] = coords;
+        setCenter([lat, lng]);
+        onChange({ lat, lng, barangay: v });
+      } else if (value) {
+        onChange({ ...value, barangay: v });
+      }
     },
     [value, onChange]
   );
@@ -115,8 +171,10 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
       (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
+        const resolvedBarangay = nearestBarangayFor(lat, lng);
         setCenter([lat, lng]);
-        onChange({ lat, lng, barangay: barangay || "Other (manual)" });
+        setBarangay(resolvedBarangay);
+        onChange({ lat, lng, barangay: resolvedBarangay });
         setLoading(false);
       },
       (err) => {
@@ -128,7 +186,7 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
         setLoading(false);
       }
     );
-  }, [barangay, onChange]);
+  }, [onChange]);
 
   useEffect(() => {
     if (value) {
@@ -183,8 +241,8 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
             scrollWheelZoom
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
             <Marker
               ref={markerRef}
@@ -194,8 +252,10 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
                 dragend(e) {
                   const marker = e.target;
                   const { lat, lng } = marker.getLatLng();
+                  const resolvedBarangay = nearestBarangayFor(lat, lng);
                   setCenter([lat, lng]);
-                  onChange({ lat, lng, barangay: barangay || "Other (manual)" });
+                  setBarangay(resolvedBarangay);
+                  onChange({ lat, lng, barangay: resolvedBarangay });
                 },
               }}
             />
