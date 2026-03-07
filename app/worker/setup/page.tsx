@@ -143,7 +143,7 @@ export default function WorkerSetupPage() {
     return (
       <main className="min-h-screen page-bg pt-6">
         <PageContainer>
-          <p className="text-muted-gray font-body">Loading...</p>
+          <p className="text-text-secondary font-body">Loading...</p>
         </PageContainer>
       </main>
     );
@@ -153,8 +153,8 @@ export default function WorkerSetupPage() {
     return (
       <main className="min-h-screen page-bg pt-6">
         <PageContainer>
-          <h1 className="font-display text-2xl font-bold text-slate-text mb-4">Worker setup</h1>
-          <p className="text-body text-muted-gray mb-4">
+          <h1 className="font-display text-2xl font-bold text-text-primary mb-4">Worker setup</h1>
+          <p className="text-body text-text-secondary mb-4">
             Log in first to complete your profile. OTP only.
           </p>
           <Link
@@ -171,12 +171,12 @@ export default function WorkerSetupPage() {
   return (
     <main className="min-h-screen page-bg pt-6 pb-12">
       <PageContainer>
-      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-4 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-text-primary mb-4 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
         Setup ng worker profile
       </h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="card-kumpuni p-6 space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Display name *</label>
+          <label className="label-kumpuni mb-1">Display name *</label>
           <input
             type="text"
             value={displayName}
@@ -184,12 +184,12 @@ export default function WorkerSetupPage() {
             maxLength={50}
             required
             placeholder="Pangalan o palayaw"
-            className="w-full min-h-touch px-3 rounded border border-gray-300"
+            className="input-kumpuni"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Larawan ng profile *</label>
+          <label className="label-kumpuni mb-1">Larawan ng profile *</label>
           <input
             type="file"
             accept="image/*"
@@ -202,7 +202,7 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Skills * (pili lahat na apply)</label>
+          <label className="label-kumpuni mb-1">Skills * (pili lahat na apply)</label>
           <div className="flex flex-wrap gap-2">
             {SKILLS.map((s) => (
               <label key={s.value} className="flex items-center gap-1">
@@ -219,11 +219,11 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Experience level</label>
+          <label className="label-kumpuni mb-1">Experience level</label>
           <select
             value={experienceLevel}
             onChange={(e) => setExperienceLevel(e.target.value)}
-            className="w-full min-h-touch px-3 rounded border border-gray-300"
+            className="input-kumpuni"
           >
             <option value="">Select...</option>
             {EXPERIENCE_LEVELS.map((l) => (
@@ -236,42 +236,42 @@ export default function WorkerSetupPage() {
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className="block text-sm font-medium mb-1">Rate min (₱/day)</label>
+            <label className="label-kumpuni mb-1">Rate min (₱/day)</label>
             <input
               type="number"
               min={0}
               value={rateMin}
               onChange={(e) => setRateMin(e.target.value)}
               placeholder="e.g. 500"
-              className="w-full min-h-touch px-3 rounded border border-gray-300"
+              className="input-kumpuni"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Rate max (₱/day)</label>
+            <label className="label-kumpuni mb-1">Rate max (₱/day)</label>
             <input
               type="number"
               min={0}
               value={rateMax}
               onChange={(e) => setRateMax(e.target.value)}
               placeholder="e.g. 1500"
-              className="w-full min-h-touch px-3 rounded border border-gray-300"
+              className="input-kumpuni"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Service area *</label>
+          <label className="label-kumpuni mb-1">Service area *</label>
           <ServiceAreaPicker
             value={serviceArea}
             onChange={setServiceArea}
           />
           {!serviceArea && (
-            <p className="text-xs text-amber-600 mt-1">Set your center and radius to appear in browse.</p>
+            <p className="text-caption text-warning mt-1">Set your center and radius to appear in browse.</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Government ID (for verification) *</label>
+          <label className="label-kumpuni mb-1">Government ID (for verification) *</label>
           <input
             type="file"
             accept="image/*,application/pdf"
@@ -281,20 +281,20 @@ export default function WorkerSetupPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Bio (optional, max 200)</label>
+          <label className="label-kumpuni mb-1">Bio (optional, max 200)</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             maxLength={200}
             rows={2}
             placeholder="Maikling intro..."
-            className="w-full px-3 py-2 rounded border border-gray-300"
+            className="input-kumpuni py-3"
           />
-          <p className="text-xs text-gray-500">{bio.length}/200</p>
+          <p className="text-caption text-text-tertiary">{bio.length}/200</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Portfolio (optional, max 6 photos)</label>
+          <label className="label-kumpuni mb-1">Portfolio (optional, max 6 photos)</label>
           <input
             type="file"
             accept="image/*"
@@ -309,10 +309,10 @@ export default function WorkerSetupPage() {
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-500">{portfolioFiles.length}/6</p>
+          <p className="text-caption text-text-tertiary">{portfolioFiles.length}/6</p>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-caption text-danger-red">{error}</p>}
 
         <button
           type="submit"

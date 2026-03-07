@@ -41,7 +41,7 @@ export default function WorkerEarningsReport({
 
   return (
     <div className="mt-4 card-kumpuni p-4">
-      <p className="text-caption font-medium text-slate-text mb-2">
+      <p className="label-kumpuni mb-2">
         Report earnings (for your records only, optional)
       </p>
       <div className="flex gap-2 items-end">

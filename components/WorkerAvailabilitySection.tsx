@@ -56,32 +56,39 @@ export default function WorkerAvailabilitySection() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-200 p-3">
-        <p className="text-sm text-gray-500">Sinisilip ang availability...</p>
+      <div className="card-kumpuni p-6 animate-pulse">
+        <p className="text-text-secondary">Sinisilip ang availability...</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 p-3 space-y-2">
-      <p className="text-sm font-medium text-gray-700">Availability</p>
-      <p className="text-xs text-gray-500 mb-2">
-        Choose when you&apos;re available for jobs. Every day at 10 PM PHT this resets to Not Available unless you change it.
-      </p>
-      <select
-        value={availability}
-        onChange={(e) => handleChange(e.target.value)}
-        disabled={saving}
-        className="w-full min-h-touch rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
-      >
-        {OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+    <div className="card-kumpuni p-6 space-y-4">
+      <div>
+        <h2 className="text-xl font-bold text-text-primary mb-1">Availability</h2>
+        <p className="text-sm text-text-secondary">
+          Choose when you&apos;re available for jobs. Every day at 10 PM PHT this resets to Not Available unless you change it.
+        </p>
+      </div>
+      <div className="relative">
+        <select
+          value={availability}
+          onChange={(e) => handleChange(e.target.value)}
+          disabled={saving}
+          className="input-kumpuni appearance-none cursor-pointer pr-10"
+        >
+          {OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-tertiary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
       {message && (
-        <p className={`text-xs ${message.includes("Na-update") ? "text-green-600" : "text-amber-600"}`}>
+        <p className={`text-sm font-medium ${message.includes("Na-update") ? "text-success-green" : "text-action-orange"}`}>
           {message}
         </p>
       )}

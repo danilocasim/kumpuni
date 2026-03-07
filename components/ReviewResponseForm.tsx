@@ -41,7 +41,7 @@ export default function ReviewResponseForm({
 
   return (
     <form onSubmit={handleSubmit} className="mt-2">
-      <label htmlFor={`response-${reviewId}`} className="text-caption font-medium text-slate-text">
+      <label htmlFor={`response-${reviewId}`} className="label-kumpuni mb-1">
         Iyong response (max 200 character, isang beses lang)
       </label>
       <textarea
@@ -53,7 +53,7 @@ export default function ReviewResponseForm({
         disabled={!!initialResponse}
         className="input-kumpuni mt-1 min-h-[60px] py-2 text-body disabled:opacity-70"
       />
-      <p className="text-caption text-muted-gray">{response.length}/200</p>
+      <p className="text-caption text-text-tertiary">{response.length}/200</p>
       {!initialResponse && (
         <button
           type="submit"

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import JobReviewForm from "@/components/JobReviewForm";
+import { PageContainer } from "@/components/PageContainer";
 
 export default async function JobReviewPage({
   params,
@@ -44,17 +45,17 @@ export default async function JobReviewPage({
     .maybeSingle();
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-[480px] mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-2">
+    <main className="min-h-screen py-8 max-w-[480px] mx-auto page-bg"><PageContainer>
+      <h1 className="font-display text-2xl lg:text-[28px] font-bold text-text-primary tracking-tight mb-2">
         Leave a review
       </h1>
-      <p className="text-body text-muted-gray mb-6">
+      <p className="text-[15px] font-body text-text-secondary leading-relaxed mb-6">
         Rate and review {revieweeDisplayName} for the completed job.
       </p>
 
       {existingReview ? (
         <div className="card-kumpuni p-6 text-center">
-          <p className="text-body font-medium text-slate-text mb-4">
+          <p className="text-[15px] font-body font-medium text-text-primary mb-4">
             Salamat! Na-submit na ang review mo para sa job na ito.
           </p>
           <Link href={`/jobs/${id}`} className="btn-primary inline-flex">
@@ -68,6 +69,6 @@ export default async function JobReviewPage({
           revieweeDisplayName={revieweeDisplayName}
         />
       )}
-    </main>
+    </PageContainer></main>
   );
 }

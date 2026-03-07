@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import JobFastMatch from "@/components/JobFastMatch";
+import { PageContainer } from "@/components/PageContainer";
 
 export default async function JobFastPage({
   params,
@@ -56,13 +57,14 @@ export default async function JobFastPage({
   }>;
 
   return (
-    <main className="min-h-screen p-4 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold mb-4">Fast Match — interested workers</h1>
+    <main className="min-h-screen page-bg pt-6 pb-12"><PageContainer>
+      <h1 className="font-display text-2xl lg:text-3xl font-bold text-text-primary mb-6 tracking-tight">Fast Match — interested workers</h1>
       <JobFastMatch
         jobId={id}
         initialJob={initialJob}
         initialWorkers={initialWorkers}
       />
+      </PageContainer>
     </main>
   );
 }

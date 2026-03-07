@@ -23,10 +23,10 @@ export default function HowItWorksPage() {
   return (
     <main className="min-h-screen page-bg pt-6 pb-12">
       <PageContainer>
-        <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text text-center mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
+        <h1 className="font-display text-2xl lg:text-[28px] font-bold text-text-primary text-center mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
           How it works
         </h1>
-        <p className="text-center text-muted-gray font-body text-[15px] mb-10">
+        <p className="text-center text-text-secondary font-body text-[15px] mb-10">
           Three simple steps to find a skilled worker.
         </p>
 
@@ -40,8 +40,8 @@ export default function HowItWorksPage() {
                 {step.num}
               </span>
               <div>
-                <h2 className="font-display font-bold text-[20px] lg:text-[22px] text-slate-text">{step.title}</h2>
-                <p className="text-muted-gray font-body text-[15px] mt-1">{step.desc}</p>
+                <h2 className="font-display font-bold text-[20px] lg:text-[22px] text-text-primary">{step.title}</h2>
+                <p className="text-text-secondary font-body text-[15px] mt-1">{step.desc}</p>
               </div>
             </li>
           ))}

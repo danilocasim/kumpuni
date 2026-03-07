@@ -2,56 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* --- Design system: Kapitbahay Energy --- */
+/* --- Local Worker Marketplace Design System --- */
 :root {
-  --kumpuni-blue: #1B4A6B;
-  --action-orange: #E8722A;
-  --concrete-white: #F5F2EE;
-  --wood-brown: #8B6914;
-  --verified-green: #2D8B4E;
-  --slate-text: #3A3A3A;
-  --muted-gray: #9B9B9B;
-  --danger-red: #C0392B;
-  --blue-light: #E8F0F7;
-  --orange-light: #FFF0E6;
-  --green-light: #E6F5EC;
-  --shadow-sm: 0 1px 3px rgba(27, 74, 107, 0.08);
-  --shadow-md: 0 4px 12px rgba(27, 74, 107, 0.12);
-  --shadow-lg: 0 8px 24px rgba(27, 74, 107, 0.16);
-  --radius-sm: 6px;
-  --radius-md: 10px;
+  --kumpuni-blue: #214365;
+  --action-orange: #E57A44;
+  --page-bg: #F8F9FA;
+  --surface-light: #F4F6F8;
+  --concrete-white: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-tertiary: #6B7280;
+  --border-subtle: #E5E9EC;
+  --danger-red: #EF4444;
+  --success-green: #10B981;
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 16px;
   --touch-min: 48px;
 }
 
-/* Base: warm background + subtle grain texture (concrete wall feel) */
 body {
-  background-color: var(--concrete-white);
-  color: var(--slate-text);
+  background-color: var(--page-bg);
+  color: var(--text-secondary);
   -webkit-font-smoothing: antialiased;
-}
-
-/* Subtle noise overlay - 0.03 opacity (barely visible, subconsciously felt) */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 9999;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .page-bg {
-  background-color: var(--concrete-white);
+  background-color: var(--page-bg);
 }
 
-/* Leaflet map container */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-family: var(--font-plus-jakarta), sans-serif;
+  letter-spacing: -0.02em;
+}
+
 .leaflet-container {
   height: 100%;
   min-height: 200px;
@@ -67,8 +53,13 @@ body::before {
   height: 44px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid var(--kumpuni-blue);
-  box-shadow: var(--shadow-sm);
+  border: 3px solid var(--concrete-white);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s;
+}
+.avatar-marker-wrap:hover {
+  transform: scale(1.1);
+  border-color: var(--action-orange);
 }
 .avatar-marker-wrap img {
   width: 100%;
@@ -76,7 +67,6 @@ body::before {
   object-fit: cover;
 }
 
-/* Touch targets */
 @layer base {
   .touch-target {
     min-height: var(--touch-min);
@@ -84,21 +74,18 @@ body::before {
   }
 }
 
-  /* --- Component layer: buttons --- */
 @layer components {
+  /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-[6px] font-body font-bold text-[15px] uppercase tracking-wider text-center;
-    background-color: #E8722A;
-    color: white;
-    box-shadow: 0 2px 4px rgba(232, 114, 42, 0.3);
-    transition: transform 0.1s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-kumpuni-md font-body font-semibold text-white transition-all bg-kumpuni-blue hover:-translate-y-0.5 active:translate-y-0;
+    box-shadow: 0 2px 4px rgba(33, 67, 101, 0.15);
   }
   .btn-primary:hover {
-    background-color: #D4651F;
-    box-shadow: 0 3px 6px rgba(232, 114, 42, 0.35);
+    box-shadow: 0 4px 8px rgba(33, 67, 101, 0.25);
+    background-color: #1a3652;
   }
   .btn-primary:active {
-    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(33, 67, 101, 0.15);
   }
   @media (min-width: 1024px) {
     .btn-primary {
@@ -108,61 +95,50 @@ body::before {
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-[6px] font-body font-semibold text-[15px] bg-transparent text-center;
-    color: #1B4A6B;
-    border: 1.5px solid #1B4A6B;
-    transition: background-color 0.15s ease, transform 0.1s ease;
-  }
-  .btn-secondary:hover {
-    background-color: var(--blue-light);
-  }
-  .btn-secondary:active {
-    transform: scale(0.97);
+    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-kumpuni-md font-body font-semibold text-kumpuni-blue bg-white border border-subtle transition-all hover:bg-surface-light active:bg-surface-light;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 
   .btn-ghost {
-    @apply font-medium text-kumpuni-blue underline-offset-2 hover:underline;
+    @apply font-medium text-text-tertiary hover:text-kumpuni-blue transition-colors underline-offset-4 hover:underline;
   }
 
-  /* Cards: white, warm border #E8E4DF, 10px radius, shadow, hover on desktop */
+  .btn-danger {
+    @apply inline-flex items-center justify-center min-h-[48px] px-6 rounded-kumpuni-md font-body font-semibold text-danger-red bg-white border border-danger-red/30 transition-all hover:bg-danger-light active:bg-danger-red active:text-white;
+  }
+
+  /* Cards */
   .card-kumpuni {
-    background: #FFFFFF;
-    border: 1px solid #E8E4DF;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(27, 74, 107, 0.08);
-    padding: 16px;
-    transition: box-shadow 0.2s;
+    @apply bg-white rounded-kumpuni-lg border border-subtle p-5 sm:p-6 transition-shadow;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
-  @media (min-width: 1024px) {
-    .card-kumpuni {
-      padding: 20px;
-    }
-    .card-kumpuni:hover {
-      box-shadow: 0 4px 12px rgba(27, 74, 107, 0.12);
-    }
+  .card-kumpuni:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
 
-  /* Left border accent by status (add with card-kumpuni) */
-  .card-accent-asap { border-left: 3px solid #E8722A; }
-  .card-accent-this-week { border-left: 3px solid #1B4A6B; }
-  .card-accent-flexible { border-left: 3px solid #9B9B9B; }
-  .card-accent-open { border-left: 3px solid #1B4A6B; }
-  .card-accent-completed { border-left: 3px solid #2D8B4E; }
-  .card-accent-cancelled { border-left: 3px solid #C0392B; }
-  .card-accent-available { border-left: 3px solid #2D8B4E; }
-  .card-accent-not-available { border-left: 3px solid #9B9B9B; }
+  /* Left border accent by status */
+  .card-accent-asap { border-left: 4px solid var(--action-orange); }
+  .card-accent-this-week { border-left: 4px solid var(--kumpuni-blue); }
+  .card-accent-flexible { border-left: 4px solid var(--text-tertiary); }
+  .card-accent-open { border-left: 4px solid var(--kumpuni-blue); }
+  .card-accent-completed { border-left: 4px solid var(--success-green); }
+  .card-accent-cancelled { border-left: 4px solid var(--danger-red); }
+  .card-accent-available { border-left: 4px solid var(--success-green); }
+  .card-accent-not-available { border-left: 4px solid var(--text-tertiary); }
 
-  /* Status badges: rounded-[4px], dot + text, DM Sans 11px 700 */
+  /* Status badges */
   .badge-status {
-    @apply inline-flex items-center gap-1.5 rounded-[4px] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider font-body;
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide font-body;
   }
-  .badge-asap { background: var(--orange-light); color: var(--action-orange); }
-  .badge-this-week { background: var(--blue-light); color: var(--kumpuni-blue); }
-  .badge-flexible { background: #F0F0F0; color: var(--muted-gray); }
-  .badge-available { background: var(--green-light); color: var(--verified-green); }
-  .badge-not-available { background: #F0F0F0; color: var(--muted-gray); }
-  .badge-completed { background: var(--green-light); color: var(--verified-green); }
-  .badge-cancelled { background: #FDEDEC; color: var(--danger-red); }
+  .badge-asap { @apply bg-orange-50 text-action-orange; }
+  .badge-this-week { @apply bg-blue-50 text-kumpuni-blue; }
+  .badge-matched { @apply bg-indigo-50 text-indigo-700; }
+  .badge-in-progress { @apply bg-blue-50 text-kumpuni-blue; }
+  .badge-flexible { @apply bg-gray-100 text-text-tertiary; }
+  .badge-available { @apply bg-emerald-50 text-success-green; }
+  .badge-not-available { @apply bg-gray-100 text-text-tertiary; }
+  .badge-completed { @apply bg-emerald-50 text-success-green; }
+  .badge-cancelled { @apply bg-red-50 text-danger-red; }
 
   .badge-dot {
     width: 6px;
@@ -170,44 +146,33 @@ body::before {
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .badge-asap .badge-dot { background: var(--action-orange); }
-  .badge-this-week .badge-dot { background: var(--kumpuni-blue); }
+  .badge-asap .badge-dot { @apply bg-action-orange; }
+  .badge-this-week .badge-dot { @apply bg-kumpuni-blue; }
+  .badge-matched .badge-dot { @apply bg-indigo-700; }
+  .badge-in-progress .badge-dot { @apply bg-kumpuni-blue; }
   .badge-flexible .badge-dot,
-  .badge-not-available .badge-dot { background: var(--muted-gray); }
+  .badge-not-available .badge-dot { @apply bg-text-tertiary; }
   .badge-available .badge-dot,
-  .badge-completed .badge-dot { background: var(--verified-green); }
-  .badge-cancelled .badge-dot { background: var(--danger-red); }
+  .badge-completed .badge-dot { @apply bg-success-green; }
+  .badge-cancelled .badge-dot { @apply bg-danger-red; }
 
   /* Form inputs */
   .input-kumpuni {
-    @apply w-full min-h-[48px] px-3 rounded-kumpuni-sm bg-white border-[1.5px] text-body;
-    border-color: var(--warm-border-input);
-    color: var(--slate-text);
-  }
-  .input-kumpuni:focus {
-    outline: none;
-    border-width: 2px;
-    border-color: var(--kumpuni-blue);
+    @apply w-full min-h-[48px] px-4 py-2 rounded-kumpuni-sm bg-white border border-gray-300 text-body text-text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-kumpuni-blue/20 focus:border-kumpuni-blue placeholder:text-text-tertiary placeholder:font-normal;
   }
   .input-kumpuni.error {
-    border-color: var(--danger-red);
+    @apply border-danger-red focus:ring-danger-red/20 focus:border-danger-red;
   }
   .label-kumpuni {
-    @apply block text-caption font-medium text-slate-text mb-1;
+    @apply block text-sm font-semibold text-text-secondary mb-1.5;
   }
 
   /* Skeleton loading */
   .skeleton {
-    background: #E8E4DF;
-    border-radius: var(--radius-sm);
-    animation: skeleton-shimmer 1.5s ease-in-out infinite;
-  }
-  @keyframes skeleton-shimmer {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    @apply bg-surface-light rounded-kumpuni-sm animate-pulse;
   }
 
-  /* ASAP pulsing dot */
+  /* Utility Animations */
   .pulse-asap {
     animation: pulse-asap 2s ease-in-out infinite;
   }
@@ -216,17 +181,15 @@ body::before {
     50% { opacity: 1; }
   }
 
-  /* One-time CTA pulse on load (not infinite) */
   .animate-cta-pulse {
     animation: cta-pulse 1.2s ease-out 1;
   }
   @keyframes cta-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(232, 114, 42, 0.35); }
-    70% { box-shadow: 0 0 0 12px rgba(232, 114, 42, 0); }
-    100% { box-shadow: var(--shadow-sm); }
+    0% { box-shadow: 0 0 0 0 rgba(229, 122, 68, 0.35); }
+    70% { box-shadow: 0 0 0 12px rgba(229, 122, 68, 0); }
+    100% { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
   }
 
-  /* Card appear: stagger fade-in + slide up */
   .animate-in {
     animation: fade-in-up 0.3s ease-out backwards;
   }
@@ -240,11 +203,19 @@ body::before {
       transform: translateY(0);
     }
   }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
-/* Safe area for notched phones (bottom nav) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+

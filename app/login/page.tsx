@@ -72,8 +72,8 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center page-bg py-8">
       <PageContainer>
-      <div className="w-full max-w-[400px] mx-auto space-y-4">
-        <h1 className="font-heading text-headline-mobile font-bold text-slate-text text-center">
+      <div className="card-kumpuni w-full max-w-[400px] mx-auto p-6 space-y-5">
+        <h1 className="font-display text-2xl font-bold text-text-primary text-center tracking-tight mb-2">
           Log in
         </h1>
 
@@ -90,7 +90,7 @@ export default function LoginPage() {
               className="input-kumpuni"
               aria-describedby="phone-hint"
             />
-            <p id="phone-hint" className="text-caption text-muted-gray">
+            <p id="phone-hint" className="text-caption text-text-tertiary">
               Use a real number (E.164: +63 + 9 digits). For Twilio trial, verify the number in Twilio console first.
             </p>
             <button
@@ -108,11 +108,11 @@ export default function LoginPage() {
               Enter the code you received
             </label>
             {devHint && (
-              <p className="text-caption text-slate-text bg-orange-light border border-action-orange/30 rounded-kumpuni-sm px-2 py-1.5 mb-2">
+              <p className="text-caption text-text-primary bg-warning-light border border-warning rounded-kumpuni-sm px-2 py-1.5 mb-2">
                 {devHint}
               </p>
             )}
-            <p className="text-caption text-muted-gray mb-2">
+            <p className="text-caption text-text-tertiary mb-2">
               No code? Check: (1) Supabase Dashboard → Auth → Providers → Phone — enabled with Twilio SID, Auth Token, and Twilio number. (2) Twilio trial: add your number to Verified Caller IDs in Twilio Console.
             </p>
             <input

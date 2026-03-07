@@ -105,100 +105,176 @@ export default function WorkerJobPageClient({
   const canCancelWorker = isAssignedWorker && job.status === "matched";
 
   return (
-    <main className="min-h-screen p-4 pb-24 max-w-lg mx-auto page-bg">
-      <h1 className="font-heading text-headline-mobile font-bold text-slate-text mb-4">
-        Job detail
-      </h1>
-      <div className="card-kumpuni p-4 space-y-2">
-        <p className="font-medium text-slate-text">{CATEGORY_LABELS[job.category] ?? job.category}</p>
-        <p className="text-body text-slate-text">{job.description}</p>
-        <p className="text-caption text-muted-gray">Barangay: {job.barangay}</p>
-        <p className="text-caption text-muted-gray">
-          Urgency:{" "}
-          {job.urgency === "asap"
-            ? "ASAP"
-            : job.urgency === "this_week"
-              ? "This Week"
-              : "Flexible"}
-        </p>
-        {job.budget_range && (
-          <p className="text-caption text-muted-gray">Budget: {job.budget_range}</p>
-        )}
-        <p className="text-xs text-muted-gray">
-          Posted: {new Date(job.created_at).toLocaleString("en-PH")}
-        </p>
-      </div>
-
-      {showContact && (
-        <div className="mt-4 card-kumpuni border-kumpuni-blue/20 bg-blue-light/50 p-4 space-y-2">
-          <p className="text-sm font-medium text-slate-text">Contact / Address</p>
-          <p className="text-body text-slate-text">
-            Address: {(job.address && job.address.trim()) ? job.address : job.barangay}
-          </p>
-          {homeownerPhone && (
-            <p className="text-body text-slate-text">
-              May-ari:{" "}
-              <a href={`tel:${homeownerPhone}`} className="btn-ghost">
-                {homeownerPhone}
-              </a>
-            </p>
-          )}
+    <main className="min-h-screen page-bg py-8">
+      <div className="max-w-lg mx-auto">
+        <div className="mb-6 flex items-center justify-between">
+          <Link href="/worker/jobs" className="btn-ghost inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors pr-4 py-2 -ml-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <span className="font-medium">Bumalik sa Listahan</span>
+          </Link>
         </div>
-      )}
 
-      {isAssignedWorker && (job.status === "matched" || job.status === "in_progress") && (
-        <WorkerJobStatusActions jobId={jobId} currentStatus={job.status as "matched" | "in_progress"} />
-      )}
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight mb-6">
+          Detalye ng Trabaho
+        </h1>
 
-      {canCancelWorker && (
-        <div className="mt-4">
-          {cancelError && (
-            <p className="text-caption text-danger-red mb-2" role="alert">
-              {cancelError}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={cancelling}
-            className="w-full min-h-[48px] rounded-kumpuni-sm border-2 border-danger-red text-danger-red font-heading font-bold text-base bg-white hover:bg-red-50 disabled:opacity-50"
-          >
-            {cancelling ? "Saving..." : "Cancel (don't proceed)"}
-          </button>
-        </div>
-      )}
-
-      {job.status === "open" && (
-        <WorkerJobDetail
-          jobId={jobId}
-          isFastMatch={isFastMatch}
-          alreadyInterested={alreadyInterested}
-          fastMatchExpiresAt={job.fast_match_expires_at}
-        />
-      )}
-
-      {job.status === "completed" && isAssignedWorker && (
-        <>
-          <div className="mt-4 card-kumpuni border-verified-green/30 bg-green-light/30 p-4">
-            <p className="text-body text-slate-text mb-3">Na-complete mo na ang job na ito.</p>
+        <div className="card-kumpuni p-0 mb-6 overflow-hidden">
+          <div className="p-5 sm:p-6 bg-surface-light border-b border-subtle flex items-start gap-4">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0 text-kumpuni-blue border border-subtle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-text-tertiary mb-1 uppercase tracking-widest">Kategorya</h2>
+              <p className="text-xl font-bold text-text-primary">{CATEGORY_LABELS[job.category] ?? job.category}</p>
+            </div>
           </div>
-          <WorkerEarningsReport
-            jobId={jobId}
-            initialAmount={job.worker_reported_amount ?? null}
-          />
-        </>
-      )}
 
-      {job.status === "cancelled" && (
-        <div className="mt-4 card-kumpuni border-muted-gray bg-gray-100 p-3">
-          <p className="text-body text-muted-gray">Na-cancel na ang job na ito.</p>
+          <div className="p-5 sm:p-6">
+            <h3 className="text-sm font-bold text-text-tertiary mb-2 uppercase tracking-widest">Ano ang kailangang gawin?</h3>
+            <div className="bg-surface-light/50 p-4 rounded-xl border border-subtle">
+              <p className="text-base text-text-primary leading-relaxed whitespace-pre-wrap">{job.description}</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6 border-t border-subtle pt-6">
+              <div className="flex gap-3 items-start">
+                <div className="mt-0.5 text-text-tertiary">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-text-tertiary mb-0.5 uppercase tracking-wider">Lokasyon</p>
+                  <p className="text-base text-text-primary font-medium">{job.barangay}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-start">
+                <div className="mt-0.5 text-text-tertiary">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-text-tertiary mb-0.5 uppercase tracking-wider">Kailan</p>
+                  <p className="text-base text-text-primary font-medium">
+                    {job.urgency === "asap"
+                      ? "Ngayon Din (ASAP)"
+                      : job.urgency === "this_week"
+                        ? "Ngayong Linggo"
+                        : "Kahit Kailan (Flexible)"}
+                  </p>
+                </div>
+              </div>
+
+              {job.budget_range && (
+                <div className="flex gap-3 items-start">
+                  <div className="mt-0.5 text-text-tertiary">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-text-tertiary mb-0.5 uppercase tracking-wider">Est. Budget</p>
+                    <p className="text-base text-text-primary font-medium">{job.budget_range}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 items-start">
+                 <div className="mt-0.5 text-text-tertiary">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                 </div>
+                <div>
+                  <p className="text-xs font-bold text-text-tertiary mb-0.5 uppercase tracking-wider">Petsa Naka-Post</p>
+                  <p className="text-sm text-text-secondary font-medium">{new Date(job.created_at).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" })}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
 
-      <div className="mt-6">
-        <Link href="/worker/jobs" className="btn-ghost text-caption">
-          Back to job list
-        </Link>
+        {showContact && (
+          <div className="mb-6 card-kumpuni border-kumpuni-blue/30 bg-gradient-to-br from-blue-50 to-white p-6 sm:p-8 space-y-4 shadow-sm relative overflow-hidden group">
+            <div className="absolute -right-4 -bottom-4 text-kumpuni-blue/5 transform rotate-[-10deg] transition-transform group-hover:rotate-0">
+               <svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+
+            <h3 className="text-xl font-extrabold text-kumpuni-blue mb-2 relative z-10">Detalye ng May-ari</h3>
+            <div className="space-y-4 relative z-10 w-full">
+              <div className="bg-white p-4 rounded-xl border border-kumpuni-blue/10 shadow-sm">
+                <span className="text-xs font-bold text-text-tertiary uppercase tracking-wider block mb-1">Eksaktong Address</span>
+                <span className="text-base text-text-primary font-medium">{(job.address && job.address.trim()) ? job.address : job.barangay}</span>
+              </div>
+
+              {homeownerPhone && (
+                <div className="bg-white p-4 rounded-xl border border-kumpuni-blue/10 shadow-sm">
+                  <span className="text-xs font-bold text-text-tertiary uppercase tracking-wider block mb-1">Numero ng Telepono</span>
+                  <a href={`tel:${homeownerPhone}`} className="text-lg text-kumpuni-blue font-bold hover:text-blue-700 flex items-center gap-3 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
+                    {homeownerPhone}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {isAssignedWorker && (job.status === "matched" || job.status === "in_progress") && (
+          <div className="mb-6">
+            <WorkerJobStatusActions jobId={jobId} currentStatus={job.status as "matched" | "in_progress"} />
+          </div>
+        )}
+
+        {canCancelWorker && (
+          <div className="mt-8 pt-6 border-t border-subtle flex flex-col items-center sm:items-start text-center sm:text-left">
+            <h4 className="text-sm font-bold text-text-primary mb-2">Hindi mo ba kaya gawin?</h4>
+            <p className="text-sm text-text-secondary mb-4 max-w-md">
+              Kung may emergency o hindi mo na kaya puntahan ang trabaho, pwede mong i-cancel ito.
+            </p>
+            {cancelError && (
+              <div className="w-full max-w-md p-3 bg-danger-light text-danger-red rounded-xl text-sm font-medium mb-4 border border-danger-red/20 text-left flex gap-2 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{cancelError}</span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="btn-danger w-full sm:w-auto px-8 transition-colors"
+            >
+              {cancelling ? "Kinakansela..." : "I-cancel (Huwag Ituloy)"}
+            </button>
+          </div>
+        )}
+
+        {job.status === "open" && (
+          <div className="mb-6">
+            <WorkerJobDetail
+              jobId={jobId}
+              isFastMatch={isFastMatch}
+              alreadyInterested={alreadyInterested}
+              fastMatchExpiresAt={job.fast_match_expires_at}
+            />
+          </div>
+        )}
+
+        {job.status === "completed" && isAssignedWorker && (
+          <div className="mb-6 space-y-4">
+            <div className="card-kumpuni border-success-green/30 bg-success-light p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-success-green flex items-center justify-center text-white shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </div>
+              <p className="text-text-primary font-medium">Na-complete mo na ang job na ito.</p>
+            </div>
+            <WorkerEarningsReport
+              jobId={jobId}
+              initialAmount={job.worker_reported_amount ?? null}
+            />
+          </div>
+        )}
+
+        {job.status === "cancelled" && (
+          <div className="mb-6 card-kumpuni border-subtle bg-surface-light p-4 text-center">
+            <p className="text-text-secondary font-medium">Na-cancel na ang job na ito.</p>
+          </div>
+        )}
       </div>
     </main>
   );

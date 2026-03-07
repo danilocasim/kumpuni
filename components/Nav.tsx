@@ -25,7 +25,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`min-h-touch flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${active ? "text-kumpuni-blue border-t-2 border-action-orange pt-2 -mt-0.5" : "text-muted-gray"} ${className}`}
+      className={`min-h-touch flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${active ? "text-kumpuni-blue border-t-2 border-action-orange pt-[10px] -mt-[2px]" : "text-text-tertiary"} ${className}`}
     >
       {children}
     </Link>
@@ -44,8 +44,10 @@ function DesktopNavLink({
   return (
     <Link
       href={href}
-      className={`px-3 py-2 text-sm font-body font-semibold text-white transition-colors hover:text-white/90 ${
-        active ? "border-b-2 border-action-orange" : ""
+      className={`px-1 py-1 text-sm font-medium transition-colors ${
+        active
+          ? "text-white border-b-2 border-action-orange"
+          : "text-gray-300 hover:text-white"
       }`}
     >
       {children}
@@ -58,28 +60,28 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
 
   if (!isAuthenticated) {
     return (
-      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center justify-between border-b border-white/10 bg-kumpuni-blue px-4 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-        <Link
-          href="/"
-          className="font-display text-xl lg:text-2xl font-extrabold tracking-tight text-white"
-          style={{ letterSpacing: "-0.5px" }}
-        >
-          Kumpuni
-        </Link>
-        <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center justify-between border-b border-white/10 bg-kumpuni-blue px-4 lg:px-6 shadow-md">
+        <div className="max-w-screen-2xl mx-auto flex w-full justify-between items-center">
           <Link
-            href="/how-it-works"
-            className="min-h-touch min-w-touch inline-flex items-center justify-center gap-1 px-2 text-[13px] text-white/80 hover:text-white"
+            href="/"
+            className="font-display text-xl lg:text-2xl font-bold tracking-tight text-white"
           >
-            <HelpCircle className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">How it works</span>
+            Kumpuni
           </Link>
-          <Link
-            href="/login?role=homeowner&next=/jobs/new"
-            className="btn-primary min-h-[48px] px-6 text-[15px]"
-          >
-            LOG IN
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/how-it-works"
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            >
+              Paano Gumagana?
+            </Link>
+            <Link
+              href="/login?role=homeowner&next=/jobs/new"
+              className="px-5 py-2 font-bold text-sm bg-action-orange text-white rounded-md hover:bg-opacity-90 transition-colors shadow-sm"
+            >
+              LOG IN
+            </Link>
+          </div>
         </div>
       </header>
     );
@@ -90,78 +92,68 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
 
   return (
     <>
-      {/* Header: brand + desktop nav (lg+) */}
-      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center justify-between border-b border-white/10 bg-kumpuni-blue px-4 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">
-        <div className="flex flex-col">
+      <header className="sticky top-0 z-50 flex h-14 lg:h-16 items-center border-b border-white/10 bg-kumpuni-blue px-4 lg:px-6 shadow-md shrink-0">
+        <div className="max-w-screen-2xl mx-auto flex w-full justify-between items-center">
           <Link
             href={showHomeowner ? "/" : "/worker/dashboard"}
-            className="font-display text-xl lg:text-2xl font-extrabold tracking-tight text-white"
-            style={{ letterSpacing: "-0.5px" }}
+            className="font-display text-xl lg:text-2xl font-bold tracking-tight text-white"
           >
             Kumpuni
           </Link>
-          <p className="text-[12px] text-white/60 lg:hidden">
-            Find your fix
-          </p>
-        </div>
 
-        {/* Desktop nav: only on lg+ */}
-        <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
-          <DesktopNavLink href="/" active={pathname === "/"}>
-            Home
-          </DesktopNavLink>
-          {showHomeowner && (
+          <nav className="hidden lg:flex space-x-8 text-sm font-medium" aria-label="Main navigation">
+            <DesktopNavLink href="/" active={pathname === "/"}>
+              Home
+            </DesktopNavLink>
+            {showHomeowner && (
+              <DesktopNavLink
+                href="/dashboard"
+                active={pathname === "/dashboard" || (pathname?.startsWith("/jobs/") && !pathname?.startsWith("/jobs/new"))}
+              >
+                Mga Pinapagawa
+              </DesktopNavLink>
+            )}
+            {showWorker && !showHomeowner && (
+              <DesktopNavLink
+                href="/worker/jobs"
+                active={pathname?.startsWith("/worker/jobs") ?? false}
+              >
+                Trabahong Nakuha
+              </DesktopNavLink>
+            )}
+            {showHomeowner && (
+              <DesktopNavLink href="/jobs/new" active={pathname === "/jobs/new"}>
+                Mag-post
+              </DesktopNavLink>
+            )}
             <DesktopNavLink
-              href="/dashboard"
-              active={
-                pathname === "/dashboard" || (pathname?.startsWith("/jobs/") ?? false)
-              }
+              href={showWorker ? "/worker/dashboard" : "/dashboard"}
+              active={showWorker ? pathname === "/worker/dashboard" : false}
             >
-              My Jobs
+              Profile
             </DesktopNavLink>
-          )}
-          {showWorker && !showHomeowner && (
-            <DesktopNavLink
-              href="/worker/jobs"
-              active={pathname?.startsWith("/worker/jobs") ?? false}
-            >
-              My Jobs
-            </DesktopNavLink>
-          )}
-          {showHomeowner && (
-            <DesktopNavLink href="/jobs/new" active={pathname === "/jobs/new"}>
-              Post a Job
-            </DesktopNavLink>
-          )}
-          <DesktopNavLink
-            href={showWorker ? "/worker/dashboard" : "/dashboard"}
-            active={
-              pathname === "/worker/dashboard" || pathname === "/dashboard"
-            }
-          >
-            My Profile
-          </DesktopNavLink>
-        </nav>
+          </nav>
+        </div>
       </header>
 
       {/* Bottom tab bar: only on mobile/tablet (< lg) */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[60px] bg-white shadow-[0_-2px_8px_rgba(0,0,0,0.06)] flex items-stretch max-w-[480px] mx-auto pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[60px] bg-white shadow-[0_-2px_12px_rgba(0,0,0,0.1)] flex items-stretch max-w-[480px] mx-auto pb-[env(safe-area-inset-bottom)]"
         aria-label="Main navigation"
       >
         <NavLink href="/" active={pathname === "/"}>
-          <Home className="h-5 w-5" strokeWidth={2} />
+          <Home className="h-5 w-5" strokeWidth={2.5} />
           Home
         </NavLink>
         {showHomeowner && (
           <NavLink
             href="/dashboard"
             active={
-              pathname === "/dashboard" || (pathname?.startsWith("/jobs/") ?? false)
+              pathname === "/dashboard" || (pathname?.startsWith("/jobs/") && !pathname?.startsWith("/jobs/new"))
             }
           >
-            <Briefcase className="h-5 w-5" strokeWidth={2} />
-            My Jobs
+            <Briefcase className="h-5 w-5" strokeWidth={2.5} />
+            Trabaho
           </NavLink>
         )}
         {showWorker && !showHomeowner && (
@@ -169,23 +161,23 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             href="/worker/jobs"
             active={pathname?.startsWith("/worker/jobs") ?? false}
           >
-            <Briefcase className="h-5 w-5" strokeWidth={2} />
-            My Jobs
+            <Briefcase className="h-5 w-5" strokeWidth={2.5} />
+            Trabaho
           </NavLink>
         )}
         {showHomeowner && (
           <NavLink href="/jobs/new" active={pathname === "/jobs/new"}>
-            <PlusCircle className="h-5 w-5" strokeWidth={2} />
-            Post Job
+            <PlusCircle className="h-5 w-5" strokeWidth={2.5} />
+            Mag-post
           </NavLink>
         )}
         <NavLink
           href={showWorker ? "/worker/dashboard" : "/dashboard"}
           active={
-            pathname === "/worker/dashboard" || pathname === "/dashboard"
+            showWorker ? pathname === "/worker/dashboard" : false
           }
         >
-          <User className="h-5 w-5" strokeWidth={2} />
+          <User className="h-5 w-5" strokeWidth={2.5} />
           Profile
         </NavLink>
       </nav>

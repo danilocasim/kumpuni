@@ -80,15 +80,15 @@ export default function WorkerProfileModal({
       aria-modal="true"
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-4 shadow-lg"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto card-kumpuni p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start mb-3">
-          <h2 className="text-lg font-bold">Profile ng worker</h2>
+          <h2 className="font-display text-xl font-bold text-text-primary">Profile ng worker</h2>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-touch min-w-touch rounded p-1 text-gray-500 hover:bg-gray-100"
+            className="min-h-touch min-w-touch rounded p-1 text-text-tertiary hover:bg-surface-light border border-transparent hover:border-dim"
             aria-label="Isara"
           >
             ×
@@ -104,21 +104,21 @@ export default function WorkerProfileModal({
               loading="lazy"
             />
           ) : (
-            <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl font-medium">
+            <div className="h-16 w-16 rounded-full bg-surface-light shrink-0 flex items-center justify-center text-text-tertiary text-xl font-display font-medium border border-dim">
               {(worker.display_name || "W")[0]}
             </div>
           )}
           <div>
-            <p className="font-semibold">{worker.display_name || "Worker"}</p>
+            <p className="font-display font-bold text-[18px] text-text-primary">{worker.display_name || "Worker"}</p>
             {worker.is_verified && (
-              <span className="text-xs text-green-600 font-medium">Verified</span>
+              <span className="text-caption font-medium text-success-green bg-success-green/10 px-1.5 py-0.5 rounded">Verified</span>
             )}
-            <p className="text-sm text-gray-600">
+            <p className="text-[15px] font-body text-text-secondary">
               ★ {Number(worker.avg_rating).toFixed(1)} ({worker.review_count} review
               {worker.review_count !== 1 ? "s" : ""})
             </p>
             {worker.distance_km != null && (
-              <p className="text-xs text-gray-500">{worker.distance_km} km away</p>
+              <p className="text-caption text-text-tertiary">{worker.distance_km} km away</p>
             )}
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function WorkerProfileModal({
             {skills.map((s) => (
               <span
                 key={s}
-                className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+                className="rounded bg-surface-light border border-dim px-2 py-1 text-caption text-text-secondary"
               >
                 {s}
               </span>
@@ -136,30 +136,30 @@ export default function WorkerProfileModal({
           </div>
         )}
 
-        <p className="text-sm text-gray-600 mb-1">
+        <p className="text-[15px] font-body text-text-secondary mb-1">
           Availability: {AVAILABILITY_LABELS[worker.availability] ?? worker.availability}
         </p>
-        <p className="text-sm text-gray-600 mb-1">
+        <p className="text-[15px] font-body text-text-secondary mb-1">
           Rate: ₱{worker.rate_min ?? "?"} – ₱{worker.rate_max ?? "?"} / day
         </p>
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-[15px] font-body text-text-secondary mb-4">
           {worker.total_jobs} completed job{worker.total_jobs !== 1 ? "s" : ""}
         </p>
 
         {error && (
-          <p className="text-sm text-red-600 mb-2">{error}</p>
+          <p className="text-caption text-danger-red mb-3 p-2 bg-danger-red/10 rounded-kumpuni-sm">{error}</p>
         )}
 
         {phone !== null ? (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-            <p className="text-sm text-green-800 font-medium">Contact number</p>
+          <div className="card-kumpuni p-4 bg-success-green/5 border-success-green/20">
+            <p className="text-[15px] font-medium text-success-green">Contact number</p>
             <a
               href={`tel:${phone}`}
-              className="text-green-700 font-medium underline"
+              className="font-medium text-success-green/80 underline underline-offset-2"
             >
               {phone}
             </a>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-caption text-success-green/70 mt-1">
               Pwede na tumawag o mag-SMS.
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function WorkerProfileModal({
             type="button"
             disabled={loading}
             onClick={handleContact}
-            className="min-h-touch w-full rounded-lg bg-blue-600 px-4 font-medium text-white disabled:opacity-50"
+            className="btn-primary w-full disabled:opacity-50"
           >
             {loading ? "Loading..." : "Contact (show number)"}
           </button>
@@ -177,7 +177,7 @@ export default function WorkerProfileModal({
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 w-full rounded-lg border border-gray-300 py-2 text-sm text-gray-700"
+          className="btn-secondary w-full mt-3"
         >
           Isara
         </button>

@@ -76,7 +76,7 @@ export default async function PublicWorkerProfilePage({
           Back to home
         </Link>
         <div className="flex gap-4 items-start">
-          <div className="h-20 w-20 flex-shrink-0 rounded-full border-2 border-white overflow-hidden bg-concrete-white">
+          <div className="h-20 w-20 flex-shrink-0 rounded-full border-2 border-white overflow-hidden bg-white">
             {user.avatar_url ? (
               <img
                 src={user.avatar_url}
@@ -114,28 +114,28 @@ export default async function PublicWorkerProfilePage({
         {/* Stats row: clear labels, consistent alignment */}
         <div className="card-kumpuni grid grid-cols-3 divide-x divide-[#E8E4DF] p-5">
           <div className="text-center px-2">
-            <p className="font-display text-xl font-bold text-slate-text tabular-nums">
+            <p className="font-display text-xl font-bold text-text-primary tabular-nums">
               {profile.total_jobs}
             </p>
-            <p className="text-[12px] font-medium text-muted-gray mt-0.5 uppercase tracking-wider">Jobs</p>
+            <p className="text-[12px] font-medium text-text-tertiary mt-0.5 uppercase tracking-wider">Jobs</p>
           </div>
           <div className="text-center px-2">
             <p className="font-display text-xl font-bold text-wood-brown tabular-nums">
               ★ {Number(profile.avg_rating).toFixed(1)}
             </p>
-            <p className="text-[12px] font-medium text-muted-gray mt-0.5 uppercase tracking-wider">Rating</p>
+            <p className="text-[12px] font-medium text-text-tertiary mt-0.5 uppercase tracking-wider">Rating</p>
           </div>
           <div className="text-center px-2">
-            <p className="font-display text-base font-bold text-slate-text tabular-nums">
+            <p className="font-display text-base font-bold text-text-primary tabular-nums">
               ₱{profile.rate_min != null ? profile.rate_min.toLocaleString() : "?"}–₱{profile.rate_max != null ? profile.rate_max.toLocaleString() : "?"}
             </p>
-            <p className="text-[12px] font-medium text-muted-gray mt-0.5">per day</p>
+            <p className="text-[12px] font-medium text-text-tertiary mt-0.5">per day</p>
           </div>
         </div>
 
         {/* Availability */}
         <div className="mt-6">
-          <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Availability</h2>
+          <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">Availability</h2>
           <span className={availabilityBadgeClass(profile.availability)}>
             <span className="badge-dot" />
             {AVAILABILITY_LABELS[profile.availability] ?? profile.availability}
@@ -145,12 +145,12 @@ export default async function PublicWorkerProfilePage({
         {/* Skills */}
         {skills.length > 0 && (
           <div className="mt-6">
-            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Skills</h2>
+            <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">Skills</h2>
             <div className="flex flex-wrap gap-2">
               {skills.map((s) => (
                 <span
                   key={s}
-                  className="rounded-kumpuni-sm bg-blue-light px-3 py-1.5 text-body font-medium text-kumpuni-blue border border-wood-brown/20"
+                  className="rounded-kumpuni-sm bg-surface-light border-kumpuni-blue/20 px-3 py-1.5 text-body font-medium text-kumpuni-blue border border-wood-brown/20"
                 >
                   {s}
                 </span>
@@ -161,15 +161,15 @@ export default async function PublicWorkerProfilePage({
 
         {profile.bio && (
           <div className="mt-6">
-            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">About</h2>
-            <p className="text-body text-slate-text leading-relaxed">{profile.bio}</p>
+            <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">About</h2>
+            <p className="text-body text-text-primary leading-relaxed">{profile.bio}</p>
           </div>
         )}
 
         {/* Portfolio */}
         {(profile.portfolio_urls ?? []).length > 0 && (
           <div className="mt-6">
-            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Portfolio</h2>
+            <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">Portfolio</h2>
             <div className="grid grid-cols-2 gap-2">
               {profile.portfolio_urls.map((url: string, i: number) => (
                 <a
@@ -194,7 +194,7 @@ export default async function PublicWorkerProfilePage({
         {/* Map */}
         {profile.service_lat != null && profile.service_lng != null && (
           <div className="mt-6">
-            <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Service area (approximate)</h2>
+            <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">Service area (approximate)</h2>
             <div className="overflow-hidden rounded-kumpuni-md border border-card-border">
               <WorkerProfileMap
                 lat={profile.service_lat}
@@ -207,9 +207,9 @@ export default async function PublicWorkerProfilePage({
 
         {/* Reviews */}
         <div className="mt-6">
-          <h2 className="font-display text-[15px] font-bold text-slate-text mb-2">Reviews</h2>
+          <h2 className="font-display text-[15px] font-bold text-text-primary mb-2">Reviews</h2>
           {recent_reviews.length === 0 ? (
-            <p className="text-body text-muted-gray">No reviews yet.</p>
+            <p className="text-body text-text-tertiary">No reviews yet.</p>
           ) : (
             <ul className="space-y-4">
               {recent_reviews.map(
@@ -228,7 +228,7 @@ export default async function PublicWorkerProfilePage({
                     <span className="absolute left-2 top-3 font-heading text-2xl text-wood-brown/50 leading-none">
                       "
                     </span>
-                    <div className="flex items-center gap-2 text-caption text-muted-gray mb-1">
+                    <div className="flex items-center gap-2 text-caption text-text-tertiary mb-1">
                       <span className="text-wood-brown">
                         ★ {r.rating}
                       </span>
@@ -237,14 +237,14 @@ export default async function PublicWorkerProfilePage({
                       </span>
                     </div>
                     {r.comment && (
-                      <p className="text-body text-slate-text">{r.comment}</p>
+                      <p className="text-body text-text-primary">{r.comment}</p>
                     )}
                     {Array.isArray(r.tags) && r.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {r.tags.map((t) => (
                           <span
                             key={t}
-                            className="rounded px-1.5 py-0.5 text-xs bg-blue-light text-kumpuni-blue"
+                            className="rounded px-1.5 py-0.5 text-xs bg-surface-light border-kumpuni-blue/20 text-kumpuni-blue"
                           >
                             {t}
                           </span>
@@ -252,7 +252,7 @@ export default async function PublicWorkerProfilePage({
                       </div>
                     )}
                     {r.response && (
-                      <p className="text-body text-slate-text mt-2 pl-2 border-l-2 border-muted-gray/30 italic">
+                      <p className="text-body text-text-primary mt-2 pl-2 border-l-2 border-dim italic">
                         Response: {r.response}
                       </p>
                     )}
@@ -270,13 +270,13 @@ export default async function PublicWorkerProfilePage({
         </div>
 
         {/* Contact CTA: clear instruction */}
-        <div className="mt-8 p-4 rounded-kumpuni-sm bg-blue-light/40 border border-kumpuni-blue/20">
+        <div className="mt-8 p-4 rounded-kumpuni-sm bg-surface-light border-kumpuni-blue/20/40 border border-kumpuni-blue/20">
           {isLoggedIn ? (
-            <p className="text-[14px] text-slate-text leading-relaxed">
+            <p className="text-[14px] text-text-primary leading-relaxed">
               To contact this worker, post a job and choose them from the Browse workers list — their number will appear there.
             </p>
           ) : (
-            <p className="text-[14px] text-slate-text leading-relaxed">
+            <p className="text-[14px] text-text-primary leading-relaxed">
               <Link href={`/login?next=/workers/${id}`} className="font-semibold text-kumpuni-blue hover:underline">
                 Log in
               </Link>

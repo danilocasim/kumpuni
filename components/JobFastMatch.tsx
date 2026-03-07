@@ -159,20 +159,20 @@ export default function JobFastMatch({
 
   if (selectedResult) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-        <h2 className="font-semibold text-green-800">Na-match na!</h2>
-        <p className="mt-2 text-sm text-green-700">
+      <div className="card-kumpuni p-5 border-success-green/20 bg-success-green/5">
+        <h2 className="font-display font-bold text-success-green text-lg">Na-match na!</h2>
+        <p className="mt-2 text-[15px] font-body text-success-green/80">
           Contact ng homeowner:{" "}
           <a href={`tel:${selectedResult.homeowner_phone}`} className="underline">
             {selectedResult.homeowner_phone}
           </a>
         </p>
-        <p className="mt-1 text-sm text-green-700">
+        <p className="mt-1 text-[15px] font-body text-success-green/80">
           Address: {selectedResult.job_address}
         </p>
         <Link
           href={`/jobs/${jobId}`}
-          className="mt-4 inline-block min-h-touch min-w-touch rounded-lg bg-green-600 px-4 font-medium text-white inline-flex items-center justify-center"
+          className="mt-4 btn-primary mt-6 w-full sm:w-auto inline-flex items-center justify-center"
         >
           View job
         </Link>
@@ -182,9 +182,9 @@ export default function JobFastMatch({
 
   if (isMatched) {
     return (
-      <p className="text-gray-600">
+      <p className="text-text-secondary text-[15px] font-body">
         Na-match na ang job na ito.{" "}
-        <Link href={`/jobs/${jobId}`} className="text-blue-600 underline">
+        <Link href={`/jobs/${jobId}`} className="font-medium text-action-orange hover:text-action-orange/80 underline-offset-4">
           View job
         </Link>
       </p>
@@ -196,15 +196,15 @@ export default function JobFastMatch({
       {expiresAt && (
         <div
           className={`rounded-lg border p-3 text-center ${
-            isExpired ? "border-gray-300 bg-gray-50" : "border-amber-200 bg-amber-50"
+            isExpired ? "border-dim bg-surface-light" : "border-warning/30 bg-warning-light"
           }`}
         >
           {isExpired ? (
-            <p className="text-gray-600">
+            <p className="text-text-secondary text-[15px] font-body">
               Tapos na ang Fast Match window. Automatic na itong naka-Flexible Match.
             </p>
           ) : (
-            <p className="text-amber-800">
+            <p className="text-warning font-medium">
               Countdown:{" "}
               <span className="font-mono font-bold">
                 {Math.floor((secondsLeft ?? 0) / 60)}:
@@ -216,18 +216,18 @@ export default function JobFastMatch({
       )}
 
       {error && (
-        <p className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>
+        <p className="rounded bg-danger-red/10 border border-danger-red/20 text-danger-red p-3 rounded-kumpuni-sm text-[14px]">{error}</p>
       )}
 
       {newInterestCount > 0 && (
-        <p className="rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm font-medium text-green-800 animate-in">
+        <p className="card-kumpuni border-success-green/30 bg-success-green/10 px-4 py-3 text-[14px] font-medium text-success-green animate-in">
           New interest — list updated in real time
         </p>
       )}
 
-      <h2 className="font-semibold">Mga worker na interested</h2>
+      <h2 className="font-display font-bold text-lg text-text-primary">Interested Workers</h2>
       {!workers.length ? (
-        <p className="text-gray-600">
+        <p className="text-text-secondary text-[15px] font-body">
           {isExpired
             ? "No workers in radius have expressed interest. The job is now on Flexible Match — you can view the list on the job detail page."
             : "No one has expressed interest yet. The list updates in real time. If no one is interested within 15 min, the job automatically switches to Flexible Match."}
@@ -237,18 +237,18 @@ export default function JobFastMatch({
           {workers.map((w) => (
             <li
               key={w.worker_id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 p-3"
+              className="flex flex-wrap items-center justify-between gap-2 card-kumpuni p-4 hover:border-kumpuni-blue/30 transition-colors"
             >
               <div>
-                <p className="font-medium">
+                <p className="font-display font-medium text-[16px] text-text-primary">
                   {w.display_name || "Worker"}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-text-secondary text-[15px] font-body">
                   Rating: {Number(w.avg_rating).toFixed(1)} · Jobs: {w.total_jobs}
                   {w.distance_km != null && ` · ${w.distance_km} km`}
                 </p>
                 {(w.rate_min != null || w.rate_max != null) && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-tertiary">
                     Rate: ₱{w.rate_min ?? "?"}–₱{w.rate_max ?? "?"}
                   </p>
                 )}
@@ -257,7 +257,7 @@ export default function JobFastMatch({
                 type="button"
                 disabled={loading || isExpired}
                 onClick={() => handleSelect(w.worker_id)}
-                className="min-h-touch min-w-touch rounded-lg bg-blue-600 px-4 font-medium text-white disabled:opacity-50"
+                className="btn-primary whitespace-nowrap disabled:opacity-50"
               >
                 Select
               </button>
@@ -268,7 +268,7 @@ export default function JobFastMatch({
 
       <Link
         href={`/jobs/${jobId}`}
-        className="inline-block text-sm text-blue-600 underline"
+        className="inline-block text-sm font-medium text-action-orange hover:text-action-orange/80 underline-offset-4"
       >
         View job detail
       </Link>

@@ -46,16 +46,8 @@ export default async function JobBrowsePage({
       : 3.0;
 
   return (
-    <main className="min-h-screen page-bg pt-6 pb-6">
-      <PageContainer wide>
-        <h1 className="font-display text-2xl lg:text-[28px] font-bold text-slate-text mb-2 tracking-tight" style={{ letterSpacing: "-0.3px" }}>
-          Workers
-        </h1>
-        <p className="text-[13px] text-muted-gray font-body mb-4">
-          View the list and map of workers nearby. Set minimum rating, then tap a worker to see their profile and Contact to reveal their number.
-        </p>
-        <BrowseWorkersView jobId={id} initialMinRating={safeRating} />
-      </PageContainer>
+    <main className="h-screen flex flex-col bg-[#F8F9FA] overflow-hidden">
+      <BrowseWorkersView jobId={id} initialMinRating={safeRating} />
     </main>
   );
 }

@@ -134,8 +134,8 @@ export default function BrowseWorkersMap({
   }
 
   return (
-    <div className="w-full space-y-1">
-      <div className="h-64 w-full rounded-lg border border-gray-200 overflow-hidden z-0 bg-gray-100" style={{ minHeight: 256 }}>
+    <div className="w-full h-full">
+      <div className="h-full w-full overflow-hidden z-0 bg-gray-100" style={{ minHeight: 256 }}>
         <MapContainer
           key={`map-${fitBoundsPoints.length}-${center[0]}-${center[1]}`}
           center={center}

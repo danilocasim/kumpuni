@@ -91,7 +91,7 @@ export function JobPhotoUpload({ value, onChange, className = "" }: JobPhotoUplo
         ))}
       </div>
       {value.length < MAX_FILES && (
-        <label className="min-h-[100px] w-[100px] rounded-kumpuni-md border-2 border-dashed border-grain-bg flex flex-col items-center justify-center gap-1 text-caption text-muted-gray cursor-pointer hover:border-action-orange hover:text-slate-text transition-colors">
+        <label className="min-h-[100px] w-[100px] rounded-kumpuni-md border-2 border-dashed border-dim flex flex-col items-center justify-center gap-1 text-caption text-text-tertiary cursor-pointer hover:border-action-orange hover:text-text-primary transition-colors">
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"

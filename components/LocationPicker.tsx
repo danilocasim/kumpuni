@@ -204,40 +204,66 @@ export function LocationPicker({ value, onChange, className = "" }: LocationPick
 
   return (
     <div className={className}>
-      <div className="flex gap-2 mb-2">
+      <div className="flex gap-2 mb-3">
         <button
           type="button"
           onClick={getCurrentLocation}
           disabled={loading}
-          className="min-h-touch px-3 rounded border border-gray-300 bg-gray-50 text-sm disabled:opacity-50"
+          className="btn-secondary py-2 px-4 shadow-sm flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto justify-center"
         >
-          {loading ? "Getting..." : "Use current location"}
+          {loading ? (
+             <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-kumpuni-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Hinahanap...
+             </span>
+          ) : (
+             <>
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+               Gamitin ang kasalukuyang lokasyon
+             </>
+          )}
         </button>
       </div>
-      {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-      <label className="block text-sm font-medium mb-1">Barangay (optional, select from list)</label>
-      <select
-        value={barangay}
-        onChange={handleBarangayChange}
-        className="w-full min-h-touch px-3 rounded border border-gray-300 mb-2"
-      >
-        <option value="">Select barangay...</option>
-        {METRO_MANILA_BARANGAYS.map((b) => (
-          <option key={b} value={b}>
-            {b}
-          </option>
-        ))}
-      </select>
-      <div className="h-64 rounded border border-gray-300 overflow-hidden bg-gray-100">
+      {error && <p className="text-sm font-medium text-danger-red mb-3 bg-danger-light p-2 rounded-md border border-danger-red/20">{error}</p>}
+
+      <div className="relative mb-3">
+        <label className="block text-sm font-bold text-text-primary mb-1">Barangay <span className="font-normal text-text-secondary">(Opsyonal)</span></label>
+        <div className="relative">
+          <select
+            value={barangay}
+            onChange={handleBarangayChange}
+            className="input-kumpuni appearance-none cursor-pointer pr-10 py-2.5"
+          >
+            <option value="">Pumili ng barangay...</option>
+            {METRO_MANILA_BARANGAYS.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-tertiary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-64 rounded-xl border-2 border-subtle overflow-hidden bg-surface-light shadow-inner relative z-0">
         {!mapReady ? (
-          <div className="h-full w-full flex items-center justify-center text-gray-500 text-sm">
-            Loading map...
+          <div className="h-full w-full flex flex-col items-center justify-center text-text-secondary text-sm gap-2">
+            <svg className="animate-spin h-6 w-6 text-kumpuni-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Nilo-load ang mapa...
           </div>
         ) : (
           <MapContainer
             center={center}
             zoom={DEFAULT_ZOOM}
-            style={{ height: "100%", width: "100%" }}
+            style={{ height: "100%", width: "100%", zIndex: 0 }}
             scrollWheelZoom
           >
             <TileLayer

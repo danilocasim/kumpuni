@@ -24,12 +24,12 @@ function availabilityBorderClass(availability: string): string {
   switch (availability) {
     case "available_now":
     case "open_anytime":
-      return "border-l-[3px] border-l-verified-green";
+      return "card-accent-available";
     case "this_week":
     case "weekends":
-      return "border-l-[3px] border-l-kumpuni-blue";
+      return "border-l-[4px] border-l-kumpuni-blue";
     default:
-      return "border-l-[3px] border-l-muted-gray";
+      return "card-accent-not-available";
   }
 }
 
@@ -84,7 +84,7 @@ export function WorkerCard({
 
   const content = (
     <>
-      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-kumpuni-blue bg-concrete-white">
+      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-kumpuni-blue bg-surface-light">
         {worker.avatar_url ? (
           <img
             src={worker.avatar_url}
@@ -93,19 +93,19 @@ export function WorkerCard({
             loading="lazy"
           />
         ) : (
-          <span className="font-heading text-lg font-bold text-muted-gray">
+          <span className="text-lg font-bold text-text-tertiary">
             {(worker.display_name || "W")[0]}
           </span>
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="font-heading text-[15px] font-bold text-slate-text truncate">
+          <span className="text-[15px] font-bold text-text-primary truncate">
             {worker.display_name || "Worker"}
           </span>
           {worker.is_verified && (
             <ShieldCheck
-              className="h-4 w-4 flex-shrink-0 text-verified-green"
+              className="h-4 w-4 flex-shrink-0 text-success-green"
               strokeWidth={2}
               aria-hidden
             />
@@ -116,30 +116,30 @@ export function WorkerCard({
             {skills.map((s) => (
               <span
                 key={s}
-                className="rounded px-1.5 py-0.5 text-xs font-medium text-kumpuni-blue bg-blue-light"
+                className="rounded px-1.5 py-0.5 text-xs font-medium text-text-secondary bg-surface-light border border-subtle"
               >
                 {s}
               </span>
             ))}
           </div>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[13px] text-slate-text">
-          <span className="text-wood-brown">
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13px] text-text-primary">
+          <span className="text-action-orange font-medium">
             ★ {Number(worker.avg_rating).toFixed(1)}
           </span>
-          <span className="font-mono text-muted-gray">
+          <span className="text-text-tertiary">
             ({worker.review_count})
           </span>
-          <span className="text-muted-gray">·</span>
-          <span className="font-mono text-slate-text">{rateStr}</span>
+          <span className="text-text-tertiary">·</span>
+          <span className="text-text-secondary">{rateStr}</span>
         </div>
-        <div className="mt-0.5 flex items-center gap-1.5 text-[13px]">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           {showDistance && worker.distance_km != null && (
             <>
-              <span className="text-muted-gray">
+              <span className="text-text-tertiary text-sm">
                 {worker.distance_km.toFixed(1)} km
               </span>
-              <span className="text-muted-gray">·</span>
+              <span className="text-text-tertiary">·</span>
             </>
           )}
           <span className={availabilityBadgeClass(worker.availability)}>
@@ -149,7 +149,7 @@ export function WorkerCard({
         </div>
       </div>
       <ChevronRight
-        className="h-5 w-5 flex-shrink-0 text-muted-gray"
+        className="h-5 w-5 flex-shrink-0 text-text-tertiary mt-4"
         strokeWidth={2}
         aria-hidden
       />

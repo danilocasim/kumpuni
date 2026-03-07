@@ -28,7 +28,7 @@ export default async function WorkerJobPage({
   if (job.status !== "open" && job.worker_id !== user.id) {
     return (
       <main className="min-h-screen p-4 page-bg">
-        <p className="text-body text-slate-text">This job is not available.</p>
+        <p className="text-body text-text-primary">This job is not available.</p>
         <Link href="/worker/jobs" className="btn-ghost mt-2 inline-block">
           Back to job list
         </Link>

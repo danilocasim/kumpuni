@@ -71,7 +71,7 @@ export default function JobReviewForm({
   if (submitted) {
     return (
       <div className="card-kumpuni p-6 text-center">
-        <p className="text-body font-medium text-slate-text mb-4">
+        <p className="text-[15px] font-body font-medium text-text-primary mb-4">
           Salamat! Na-submit na ang review mo.
         </p>
         <Link href={`/jobs/${jobId}`} className="btn-primary inline-flex">
@@ -116,7 +116,7 @@ export default function JobReviewForm({
           rows={3}
           className="input-kumpuni min-h-[100px] py-3 resize-y"
         />
-        <p className="text-caption text-muted-gray mt-1">{comment.length}/300</p>
+        <p className="text-caption text-text-tertiary mt-1">{comment.length}/300</p>
       </div>
 
       <div>
@@ -129,8 +129,8 @@ export default function JobReviewForm({
               onClick={() => toggleTag(tag)}
               className={`rounded-kumpuni-sm px-3 py-2 text-caption font-medium border-2 transition-colors ${
                 tags.includes(tag)
-                  ? "bg-blue-light border-kumpuni-blue text-kumpuni-blue"
-                  : "bg-white border-warm-border-input text-muted-gray hover:border-kumpuni-blue"
+                  ? "bg-surface-light border-kumpuni-blue text-kumpuni-blue"
+                  : "bg-white border-dim text-text-tertiary hover:border-kumpuni-blue"
               }`}
             >
               {tag}
