@@ -181,12 +181,6 @@ export default function WorkerJobPageClient({
         <>
           <div className="mt-4 card-kumpuni border-verified-green/30 bg-green-light/30 p-4">
             <p className="text-body text-slate-text mb-3">Na-complete mo na ang job na ito.</p>
-            <Link
-              href={`/jobs/${jobId}/review`}
-              className="btn-primary inline-flex w-full justify-center"
-            >
-              Leave a review
-            </Link>
           </div>
           <WorkerEarningsReport
             jobId={jobId}

@@ -113,12 +113,6 @@ export default async function Home() {
               <p className="text-[15px] text-slate-text font-body">
                 Post a job to see workers near you.
               </p>
-              <Link
-                href="/login?role=homeowner&next=/jobs/new"
-                className="btn-secondary mt-3 inline-flex w-full lg:w-auto justify-center"
-              >
-                POST A JOB
-              </Link>
             </div>
           )}
         </PageContainer>

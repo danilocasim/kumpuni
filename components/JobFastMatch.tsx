@@ -38,6 +38,7 @@ export default function JobFastMatch({
     job_address: string;
   } | null>(null);
   const [error, setError] = useState("");
+  const [newInterestCount, setNewInterestCount] = useState(0);
 
   const fetchInterests = async () => {
     const res = await fetch(`/api/jobs/${jobId}/interests`);
@@ -51,6 +52,7 @@ export default function JobFastMatch({
     fetchInterests();
   }, [jobId]);
 
+  // Realtime (WebSocket): new workers expressing interest — list updates live
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -63,7 +65,39 @@ export default function JobFastMatch({
           table: "job_interests",
           filter: `job_id=eq.${jobId}`,
         },
-        () => fetchInterests()
+        () => {
+          setNewInterestCount((c) => c + 1);
+          fetchInterests();
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          // Optional: connection confirmed for debugging
+        }
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [jobId]);
+
+  // Realtime: job status/expiry (e.g. homeowner selected worker, or cron expired fast match)
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`job:${jobId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "jobs",
+          filter: `id=eq.${jobId}`,
+        },
+        (payload) => {
+          const newRow = payload.new as Partial<JobInfo>;
+          if (newRow && (newRow.status != null || newRow.fast_match_expires_at != null || newRow.matching_mode != null))
+            setJob((prev) => (prev ? { ...prev, ...newRow } : null));
+        }
       )
       .subscribe();
     return () => {
@@ -94,6 +128,13 @@ export default function JobFastMatch({
       setLoading(false);
     }
   };
+
+  // Clear "new interest" highlight after showing updated list
+  useEffect(() => {
+    if (newInterestCount === 0) return;
+    const t = setTimeout(() => setNewInterestCount(0), 4000);
+    return () => clearTimeout(t);
+  }, [newInterestCount, workers.length]);
 
   const expiresAt = job?.fast_match_expires_at
     ? new Date(job.fast_match_expires_at).getTime()
@@ -176,6 +217,12 @@ export default function JobFastMatch({
 
       {error && (
         <p className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p>
+      )}
+
+      {newInterestCount > 0 && (
+        <p className="rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm font-medium text-green-800 animate-in">
+          New interest — list updated in real time
+        </p>
       )}
 
       <h2 className="font-semibold">Mga worker na interested</h2>

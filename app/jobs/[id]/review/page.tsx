@@ -23,10 +23,9 @@ export default async function JobReviewPage({
   if (job.status !== "completed") redirect("/jobs/" + id);
 
   const isHomeowner = job.homeowner_id === user.id;
-  const isWorker = job.worker_id === user.id;
-  if (!isHomeowner && !isWorker) redirect("/dashboard");
+  if (!isHomeowner) redirect("/jobs/" + id);
 
-  const revieweeId = isHomeowner ? job.worker_id : job.homeowner_id;
+  const revieweeId = job.worker_id;
   if (!revieweeId) redirect("/jobs/" + id);
 
   let revieweeDisplayName = "Worker";

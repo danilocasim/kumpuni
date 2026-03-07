@@ -63,14 +63,6 @@ export default async function JobFastPage({
         initialJob={initialJob}
         initialWorkers={initialWorkers}
       />
-      <div className="mt-6">
-        <Link
-          href={`/jobs/${id}`}
-          className="text-blue-600 underline"
-        >
-          View job detail
-        </Link>
-      </div>
     </main>
   );
 }

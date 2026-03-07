@@ -45,7 +45,7 @@ TWILIO_PHONE_NUMBER=+...
 ## 3. Supabase
 
 - Create project; enable PostGIS: `CREATE EXTENSION IF NOT EXISTS postgis;`
-- Run migrations for tables: users, worker_profiles, jobs, job_interests, reviews (see data-model.md)
+- Run migrations for tables: users, worker_profiles, jobs, job_interests, reviews (see data-model.md); include `20250307000020_realtime_publication.sql` so Fast Match “I’m Interested” and job status update in real time (WebSocket).
 - Enable RLS on all tables; add policies per data-model
 - Storage buckets: avatars, portfolios, jobs (public); verification (private, admin-only RLS)
 

@@ -88,12 +88,7 @@ export default async function DashboardPage({
         </div>
       )}
       {!jobs?.length ? (
-        <>
-          <p className="text-body text-slate-text">You haven&apos;t posted any jobs yet.</p>
-          <Link href="/jobs/new" className="btn-primary mt-4 inline-flex">
-            POST A JOB
-          </Link>
-        </>
+        <p className="text-body text-slate-text">You haven&apos;t posted any jobs yet.</p>
       ) : (
         <ul className="space-y-3">
           {jobs.map((job) => (
