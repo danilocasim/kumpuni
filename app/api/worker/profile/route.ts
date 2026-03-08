@@ -62,17 +62,20 @@ export async function POST(request: NextRequest) {
 
     const admin = createAdminClient();
 
-    const { data: existingUser } = await admin.from("users").select("id").eq("id", user.id).single();
+    const { data: existingUser } = await admin.from("users").select("id").eq("id", user.id).maybeSingle();
     if (!existingUser) {
       const phone = (user as { phone?: string }).phone ?? "";
-      await admin.from("users").insert({
+      const { error: insertErr } = await admin.from("users").insert({
         id: user.id,
-        phone: phone || "pending",
+        phone: phone || `pending-${user.id.substring(0, 8)}`,
         display_name: name,
         avatar_url: avatar_url || null,
         user_role: "worker",
         updated_at: new Date().toISOString(),
       });
+      if (insertErr) {
+        console.error("Error creating missing user row:", insertErr);
+      }
     } else {
       await admin
         .from("users")
