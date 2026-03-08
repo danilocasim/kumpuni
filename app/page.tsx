@@ -3,8 +3,22 @@ import { getLandingData } from "@/lib/get-landing-data";
 import { WorkerCard } from "@/components/WorkerCard";
 import { PageContainer } from "@/components/PageContainer";
 import { Wrench, ShieldCheck, CreditCard, HelpCircle } from "lucide-react";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getSessionRole } from "@/lib/auth-role";
 
 export default async function Home() {
+  const supabase = await createClient();
+  const { user, role } = await getSessionRole(supabase);
+
+  if (user) {
+    if (role === "worker") {
+      redirect("/worker/dashboard");
+    } else {
+      redirect("/dashboard");
+    }
+  }
+
   const { workers, jobsCompletedThisMonth } = await getLandingData();
 
   return (
