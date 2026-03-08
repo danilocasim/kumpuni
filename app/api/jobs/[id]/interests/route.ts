@@ -17,7 +17,7 @@ export async function GET(
     const admin = createAdminClient();
     const { data: job, error: jobErr } = await admin
       .from("jobs")
-      .select("id, homeowner_id, fast_match_expires_at, status, matching_mode")
+      .select("id, homeowner_id, fast_match_expires_at, status, matching_mode, location")
       .eq("id", id)
       .single();
 
@@ -40,12 +40,25 @@ export async function GET(
       );
     }
 
+    // parse location "POINT(lng lat)"
+    let lat = null;
+    let lng = null;
+    if (job.location) {
+      const match = job.location.match(/POINT\(([-\d.]+) ([-\d.]+)\)/);
+      if (match) {
+        lng = parseFloat(match[1]);
+        lat = parseFloat(match[2]);
+      }
+    }
+
     return NextResponse.json({
       job: {
         id: job.id,
         fast_match_expires_at: job.fast_match_expires_at,
         status: job.status,
         matching_mode: job.matching_mode,
+        lat,
+        lng,
       },
       workers: workers ?? [],
     });

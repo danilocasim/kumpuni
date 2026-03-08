@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Clock, MapPin, Wrench, Zap, CheckCircle2, User, Star, ArrowRight, ShieldCheck, FileCheck } from "lucide-react";
+import { JobMap } from "@/components/JobMap";
 
 type WorkerRow = {
   worker_id: string;
@@ -20,6 +21,8 @@ type JobInfo = {
   fast_match_expires_at: string | null;
   status: string;
   matching_mode: string;
+  lat?: number;
+  lng?: number;
 };
 
 export default function JobFastMatch({
@@ -232,8 +235,19 @@ export default function JobFastMatch({
     );
   }
 
+  // Group real worker locations if we mapped them in the API or they exist
+  // We don't have worker raw coordinates returned in this endpoint yet except via a Join if we wanted.
+  // We can just show the job center for now.
+  const jobCenter: [number, number] | null = (job?.lat && job?.lng) ? [job.lat, job.lng] : null;
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {jobCenter && !isExpired && (
+        <div className="mb-6 animate-in slide-in-from-top-4 duration-500">
+           <JobMap jobCenter={jobCenter} className="h-48 sm:h-64 rounded-2xl border border-subtle shadow-md" zoom={14} />
+        </div>
+      )}
+
       {!isExpired && (
         <div className="relative flex flex-col items-center justify-center p-8 overflow-hidden bg-white rounded-2xl border border-border-dim shadow-sm">
           {/* Radar rings */}

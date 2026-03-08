@@ -93,9 +93,7 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             href="/"
             className="font-display text-2xl lg:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2"
           >
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-action-orange to-orange-500 flex items-center justify-center shadow-inner">
-              <span className="text-white text-lg font-black leading-none">K</span>
-            </span>
+            <img src="/logo.png" alt="Kumpuni Logo" className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg object-cover bg-white shadow-inner" />
             Kumpuni
           </Link>
           <div className="flex items-center gap-6">
@@ -128,16 +126,11 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
             href={showHomeowner ? "/" : "/worker/dashboard"}
             className="font-display text-2xl lg:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2"
           >
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-action-orange to-orange-500 flex items-center justify-center shadow-inner">
-              <span className="text-white text-lg font-black leading-none">K</span>
-            </span>
+            <img src="/logo.png" alt="Kumpuni Logo" className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg object-cover bg-white shadow-inner" />
             <span className="hidden sm:inline-block">Kumpuni</span>
           </Link>
 
           <nav className="hidden lg:flex items-center space-x-2 text-sm font-medium" aria-label="Main navigation">
-            <DesktopNavLink href="/" active={pathname === "/"}>
-              <Home className="w-4 h-4" /> Home
-            </DesktopNavLink>
             {showHomeowner && (
               <DesktopNavLink
                 href="/dashboard"
@@ -213,10 +206,6 @@ export function Nav({ userRole, isAuthenticated }: NavProps) {
         className="fixed bottom-0 left-0 right-0 z-40 lg:hidden h-[64px] bg-white/95 backdrop-blur-md shadow-[0_-4px_24px_rgba(0,0,0,0.08)] flex items-stretch max-w-[500px] mx-auto pb-[env(safe-area-inset-bottom)] border-t border-subtle"
         aria-label="Main navigation"
       >
-        <NavLink href="/" active={pathname === "/"}>
-          <Home className={`h-[22px] w-[22px] ${pathname === "/" ? "text-kumpuni-blue" : ""}`} strokeWidth={pathname === "/" ? 3 : 2} />
-          <span className="mt-1">Home</span>
-        </NavLink>
         {showHomeowner && (
           <NavLink
             href="/dashboard"
