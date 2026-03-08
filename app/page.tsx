@@ -10,50 +10,83 @@ export default async function Home() {
   return (
     <main className="min-h-screen page-bg">
       {/* Hero: light blue tint block, 2-col on desktop */}
-      <section className="bg-kumpuni-blue/5 pt-6 pb-8 lg:py-10">
+      <section className="bg-gradient-to-br from-kumpuni-blue/10 via-surface-light to-white pt-6 pb-12 lg:py-16 border-b border-subtle relative overflow-hidden">
+        {/* Abstract Background Design */}
+        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] rounded-full bg-kumpuni-blue/5 blur-3xl -z-10 animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[600px] h-[600px] rounded-full bg-action-orange/5 blur-3xl -z-10 animate-pulse" style={{ animationDuration: '6s' }}></div>
+        
         <PageContainer>
-          <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
-            <div>
-              <h1 className="font-display text-4xl lg:text-5xl font-extrabold text-kumpuni-blue leading-tight tracking-tight mb-4" style={{ letterSpacing: "-0.5px" }}>
-                Kailangan ng <span className="text-action-orange flex-wrap inline-flex items-center gap-2">kumpuni?</span>
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center relative z-10">
+            <div className="animate-in" style={{ animationDuration: '800ms' }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-subtle shadow-sm mb-6 animate-in" style={{ animationDelay: '100ms' }}>
+                <span className="flex h-2 w-2 rounded-full bg-success-green animate-pulse"></span>
+                <span className="text-xs font-bold text-text-secondary uppercase tracking-widest">Naglilingkod sa Metro Manila</span>
+              </div>
+              <h1 className="font-display text-4xl lg:text-5xl xl:text-6xl font-extrabold text-kumpuni-blue leading-tight tracking-tight mb-6 animate-in" style={{ animationDelay: '200ms', letterSpacing: "-1px" }}>
+                Kailangan ng <span className="text-transparent bg-clip-text bg-gradient-to-r from-action-orange to-orange-400">kumpuni?</span>
               </h1>
-              <p className="mt-4 text-base lg:text-lg text-text-secondary font-body leading-relaxed max-w-lg">
+              <p className="mt-4 text-lg lg:text-xl text-text-secondary font-body leading-relaxed max-w-lg mb-8 animate-in" style={{ animationDelay: '300ms' }}>
                 Maghanap at kumonekta sa mga mapagkakatiwalaang kumpunero malapit sa iyo — palikuran, kuryente, karpintero, at iba pa.
               </p>
-              <Link
-                href="/login?role=homeowner&next=/jobs/new"
-                className="btn-primary mt-8 flex w-full lg:w-auto items-center justify-center gap-2 text-lg py-4 shadow-lg active:scale-[0.98] transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold tracking-wide">MAGPA-KUMPUNI NA</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                </div>
-              </Link>
-              <div className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-text-tertiary font-body">
+              <div className="animate-in" style={{ animationDelay: '400ms' }}>
+                <Link
+                  href="/login?role=homeowner&next=/jobs/new"
+                  className="btn-primary flex w-full lg:w-fit items-center justify-center gap-3 text-lg py-4 shadow-xl active:scale-[0.98] transition-all overflow-hidden group relative"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                  <div className="flex items-center gap-3 relative z-10">
+                    <span className="font-extrabold tracking-wide">MAGPA-KUMPUNI NA</span>
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+              <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-text-tertiary font-body animate-in" style={{ animationDelay: '500ms' }}>
                 <Link
                   href="/login?role=worker&next=/worker/setup"
                   className="btn-ghost font-medium px-2 py-1"
                 >
                   Maging Kumpunero
                 </Link>
-                <span className="text-text-tertiary/50">|</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-subtle hidden sm:block"></div>
                 <Link href="/how-it-works" className="btn-ghost inline-flex items-center gap-1.5 px-2 py-1">
-                  <HelpCircle className="h-4 w-4" strokeWidth={2.5} />
-                  <span className="font-medium">Paano ito gumagana?</span>
+                  <HelpCircle className="h-4 w-4 text-kumpuni-blue/60" strokeWidth={2.5} />
+                  <span className="font-bold text-text-secondary">Paano ito gumagana?</span>
                 </Link>
               </div>
             </div>
             {/* Desktop: decorative / preview */}
-            <div className="hidden lg:flex lg:justify-end lg:items-center relative">
-              <div className="absolute w-64 h-64 bg-action-orange/10 rounded-full blur-3xl mix-blend-multiply top-0 left-10"></div>
-              <div className="absolute w-64 h-64 bg-kumpuni-blue/10 rounded-full blur-3xl mix-blend-multiply top-20 right-10"></div>
-
-              <div className="w-[320px] h-[320px] rounded-full bg-white shadow-xl flex items-center justify-center border-4 border-kumpuni-blue/5 relative z-10">
-                <div className="w-[280px] h-[280px] rounded-full bg-kumpuni-blue/5 flex items-center justify-center">
-                  <div className="w-32 h-32 rounded-kumpuni-xl bg-gradient-to-br from-action-orange to-orange-600 flex items-center justify-center shadow-lg transform rotate-6 hover:rotate-0 transition-transform duration-500">
-                    <Wrench className="w-16 h-16 text-white" strokeWidth={2} />
+            <div className="hidden lg:flex lg:justify-end lg:items-center relative animate-in zoom-in-95 duration-700" style={{ animationDelay: '300ms' }}>
+              <div className="w-[380px] h-[380px] rounded-full bg-white shadow-2xl flex items-center justify-center border-8 border-white relative z-10 group cursor-pointer overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-kumpuni-blue/5 to-transparent z-0"></div>
+                <div className="w-[340px] h-[340px] rounded-full bg-kumpuni-blue/5 flex items-center justify-center border border-white/50 backdrop-blur-sm z-10 transition-transform duration-700 group-hover:scale-105">
+                  <div className="w-36 h-36 rounded-kumpuni-xl bg-gradient-to-br from-action-orange to-orange-500 flex items-center justify-center shadow-2xl transform rotate-6 group-hover:rotate-0 transition-transform duration-500 relative ring-4 ring-white/50">
+                    <div className="absolute inset-0 bg-white/20 rounded-kumpuni-xl mix-blend-overlay"></div>
+                    <Wrench className="w-16 h-16 text-white relative z-10" strokeWidth={2} />
                   </div>
                 </div>
+              </div>
+              
+              {/* Floating badges */}
+              <div className="absolute -left-8 top-12 bg-white px-4 py-3 rounded-2xl shadow-xl border border-subtle flex items-center gap-3 z-20 animate-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: '600ms' }}>
+                 <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-success-green" />
+                 </div>
+                 <div>
+                    <p className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Trusted</p>
+                    <p className="text-sm font-extrabold text-text-primary">Verified Workers</p>
+                 </div>
+              </div>
+              
+              <div className="absolute -right-4 bottom-24 bg-white px-4 py-3 rounded-2xl shadow-xl border border-subtle flex items-center gap-3 z-20 animate-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: '800ms' }}>
+                 <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
+                    <span className="text-action-orange font-black text-lg">★</span>
+                 </div>
+                 <div>
+                    <p className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Quality</p>
+                    <p className="text-sm font-extrabold text-text-primary">Highly Rated</p>
+                 </div>
               </div>
             </div>
           </div>
@@ -99,26 +132,27 @@ export default async function Home() {
       {/* Workers near you */}
       <section className="pt-10 pb-16">
         <PageContainer>
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="font-display text-2xl lg:text-3xl font-extrabold text-text-primary tracking-tight">
+              <h2 className="font-display text-3xl lg:text-4xl font-extrabold text-text-primary tracking-tight mb-2">
                 Mga Kumpunero Malapit Sa'yo
               </h2>
-              <p className="text-sm text-text-tertiary mt-1">Available at pwedeng kontakin sa loob ng iyong barangay.</p>
+              <div className="w-16 h-1 bg-action-orange rounded-full mb-4"></div>
+              <p className="text-base text-text-tertiary">Available at pwedeng kontakin sa loob ng iyong barangay.</p>
             </div>
-            <Link href="/login?role=homeowner&next=/jobs/new" className="text-sm font-bold text-kumpuni-blue hover:text-action-orange transition-colors flex items-center gap-1 mt-2 sm:mt-0">
-              <span>Mag-post ng trabaho upang Makita Lahat</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            <Link href="/login?role=homeowner&next=/jobs/new" className="text-sm font-bold text-kumpuni-blue hover:text-action-orange hover:translate-x-1 transition-all flex items-center gap-1.5 mt-2 sm:mt-0 bg-white px-4 py-2 rounded-lg shadow-sm border border-subtle">
+              <span>Makita Lahat</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </Link>
           </div>
           {workers.length > 0 ? (
-            <ul className="grid gap-4 sm:gap-6 lg:grid-cols-2 lg:gap-8">
+            <ul className="grid gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-8">
               {workers.map((w, i) => (
                 <li
                   key={w.worker_id}
-                  className="animate-in group"
+                  className="animate-in group h-full"
                   style={{
-                    animationDelay: `${Math.min(i * 50, 200)}ms`,
+                    animationDelay: `${Math.min(i * 100, 500)}ms`,
                     animationFillMode: "backwards",
                   }}
                 >

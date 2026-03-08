@@ -249,8 +249,8 @@ export default function NewJobForm() {
       {/* ═══════════ STEP 1: Capture Photo ═══════════ */}
       {step === "capture" && (
         <div className="space-y-4">
-          <div className="card-kumpuni p-6 sm:p-8 text-center space-y-5">
-            <div className="w-20 h-20 rounded-3xl bg-blue-50 mx-auto flex items-center justify-center">
+          <div className="card-kumpuni p-6 sm:p-8 text-center space-y-5 border-t-4 border-t-kumpuni-blue shadow-md">
+            <div className="w-20 h-20 rounded-3xl bg-blue-50 mx-auto flex items-center justify-center shadow-inner">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-kumpuni-blue">
                 <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
                 <circle cx="12" cy="13" r="3"/>
@@ -258,10 +258,10 @@ export default function NewJobForm() {
             </div>
 
             <div>
-              <h2 className="text-xl font-extrabold text-text-primary mb-2">
+              <h2 className="text-2xl font-extrabold text-text-primary mb-2 tracking-tight">
                 Kunan ng Litrato ang Problema
               </h2>
-              <p className="text-sm text-text-secondary leading-relaxed max-w-sm mx-auto">
+              <p className="text-base text-text-secondary leading-relaxed max-w-sm mx-auto">
                 I-photo ang sirang tubo, saksakan, dingding, o anumang kailangang kumpunihin. Ipa-analyze ng AI para mas mabilis ang pag-post.
               </p>
             </div>
@@ -278,11 +278,11 @@ export default function NewJobForm() {
             {!photoPreview ? (
               /* No photo yet — show camera button */
               <>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 mt-4">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="btn-primary flex-1 py-4 text-base flex items-center justify-center gap-2.5 shadow-lg"
+                    className="btn-primary flex-1 py-4 text-base flex items-center justify-center gap-2.5 shadow-xl hover:-translate-y-1 transition-transform"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
@@ -292,13 +292,15 @@ export default function NewJobForm() {
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => { setStep("review"); setAnalysis(null); }}
-                  className="btn-ghost text-sm text-text-tertiary"
-                >
-                  O mag-type nang manu-mano →
-                </button>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setStep("review"); setAnalysis(null); }}
+                    className="btn-ghost text-sm font-bold text-text-tertiary hover:text-kumpuni-blue transition-colors"
+                  >
+                    O mag-type nang manu-mano →
+                  </button>
+                </div>
               </>
             ) : (
               /* Photo taken — show preview + optional note + analyze button */
@@ -337,7 +339,7 @@ export default function NewJobForm() {
                   type="button"
                   onClick={() => analyzePhoto(photoPreview!, userNote)}
                   disabled={analyzeDisabled}
-                  className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2.5 shadow-lg disabled:opacity-50"
+                  className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2.5 shadow-xl hover:-translate-y-1 transition-transform disabled:opacity-50 disabled:hover:translate-y-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72z"/><path d="m14 7 3 3"/></svg>
                   I-analyze ng AI
@@ -458,20 +460,20 @@ export default function NewJobForm() {
 
             {/* Category */}
             <div>
-              <label htmlFor="category" className="text-sm font-bold text-text-primary mb-1.5 block">Kategorya</label>
-              <div className="grid grid-cols-3 gap-2">
+              <label htmlFor="category" className="text-sm font-bold text-text-primary mb-2 block">Kategorya</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {CATEGORIES.map((c) => (
                   <button
                     key={c.value}
                     type="button"
                     onClick={() => setCategory(c.value)}
-                    className={`p-3 rounded-xl border-2 text-center transition-all duration-150 ${
+                    className={`p-4 rounded-xl border-2 text-center transition-all duration-200 hover:-translate-y-1 ${
                       category === c.value
-                        ? "border-kumpuni-blue bg-blue-50 shadow-sm"
-                        : "border-gray-100 bg-white hover:border-gray-200"
+                        ? "border-kumpuni-blue bg-blue-50 shadow-md ring-2 ring-kumpuni-blue/20"
+                        : "border-gray-100 bg-white hover:border-kumpuni-blue/30 hover:shadow-sm"
                     }`}
                   >
-                    <span className="text-2xl block mb-1">{c.icon}</span>
+                    <span className="text-3xl block mb-2">{c.icon}</span>
                     <span className={`text-xs font-bold block ${category === c.value ? "text-kumpuni-blue" : "text-text-secondary"}`}>
                       {c.label.split(" (")[0]}
                     </span>
@@ -533,7 +535,7 @@ export default function NewJobForm() {
             type="button"
             onClick={() => setStep("location")}
             disabled={!category || !description.trim()}
-            className="btn-primary w-full py-4 text-base shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            className="btn-primary w-full py-4 text-base shadow-xl flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 mt-6"
           >
             Magpatuloy — Pumili ng Lokasyon
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
