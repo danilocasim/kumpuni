@@ -65,8 +65,8 @@ export default function NewJobForm() {
 
     try {
       const compressed = await imageCompression(file, {
-        maxSizeMB: 0.3,
-        maxWidthOrHeight: 800,
+        maxSizeMB: 0.15,
+        maxWidthOrHeight: 640,
         useWebWorker: true,
       });
       const reader = new FileReader();

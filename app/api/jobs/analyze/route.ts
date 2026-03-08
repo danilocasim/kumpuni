@@ -56,6 +56,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // 200 KB base64 ~ 150 KB image — enough for vision analysis
+  const MAX_BASE64_LENGTH = 200_000;
+
   let imageBase64: string;
   let userNote = "";
   try {
@@ -78,6 +81,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Invalid image format." },
         { status: 400 }
+      );
+    }
+
+    // Strip data-URI prefix to measure raw base64 size
+    const rawBase64 = imageBase64.replace(/^data:image\/[^;]+;base64,/, "");
+    if (rawBase64.length > MAX_BASE64_LENGTH) {
+      return NextResponse.json(
+        { error: "Masyadong malaki ang litrato. Subukang kumuha ng mas maliit na larawan." },
+        { status: 413 }
       );
     }
   } catch {
@@ -112,9 +124,7 @@ Respond with ONLY the JSON object, no markdown formatting.`;
 
     const imageContent: OpenAI.Chat.Completions.ChatCompletionContentPartImage = {
       type: "image_url",
-      image_url: ai.provider === "openai"
-        ? { url: imageUrl, detail: "low" }
-        : { url: imageUrl },
+      image_url: { url: imageUrl, detail: "low" },
     };
 
     const response = await ai.client.chat.completions.create({
