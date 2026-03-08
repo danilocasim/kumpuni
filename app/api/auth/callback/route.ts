@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  let response = NextResponse.redirect(new URL(next, origin));
+  // Collect auth cookies with their full options so we can apply them
+  // to whichever final redirect response we create.
+  let authCookies: { name: string; value: string; options: Record<string, unknown> }[] = [];
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -25,10 +27,7 @@ export async function GET(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value)
         );
-        response = NextResponse.redirect(new URL(next, origin));
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
+        authCookies = cookiesToSet;
       },
     },
   });
@@ -47,6 +46,9 @@ export async function GET(request: NextRequest) {
     .eq("id", data.user.id)
     .maybeSingle();
 
+  let redirectUrl = new URL(next, origin);
+  let needsPhone = false;
+
   if (!existingUser) {
     await admin.from("users").insert({
       id: data.user.id,
@@ -57,28 +59,20 @@ export async function GET(request: NextRequest) {
       user_role: "homeowner",
       updated_at: new Date().toISOString(),
     });
-
-    // New user with no phone — redirect to phone setup
-    const phoneSetupUrl = new URL("/login/phone", origin);
-    phoneSetupUrl.searchParams.set("next", next);
-    // Re-apply cookie changes to the new redirect
-    response = NextResponse.redirect(phoneSetupUrl);
-    request.cookies.getAll().forEach(({ name, value }) => {
-      response.cookies.set(name, value);
-    });
-    return response;
+    needsPhone = true;
+  } else if (!existingUser.phone) {
+    needsPhone = true;
   }
 
-  // Existing user without phone — also redirect to phone setup
-  if (!existingUser.phone) {
-    const phoneSetupUrl = new URL("/login/phone", origin);
-    phoneSetupUrl.searchParams.set("next", next);
-    response = NextResponse.redirect(phoneSetupUrl);
-    request.cookies.getAll().forEach(({ name, value }) => {
-      response.cookies.set(name, value);
-    });
-    return response;
+  if (needsPhone) {
+    redirectUrl = new URL("/login/phone", origin);
+    redirectUrl.searchParams.set("next", next);
   }
 
+  // Build final response with proper auth cookies (including options)
+  const response = NextResponse.redirect(redirectUrl);
+  authCookies.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options)
+  );
   return response;
 }
