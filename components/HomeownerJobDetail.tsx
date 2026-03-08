@@ -51,6 +51,8 @@ export default function HomeownerJobDetail({
   const [job, setJob] = useState<JobRow>(initialJob);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
+  const [reopening, setReopening] = useState(false);
+  const [reopenError, setReopenError] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -94,6 +96,28 @@ export default function HomeownerJobDetail({
       setJob((prev) => ({ ...prev, status: "cancelled" }));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleReopen = async () => {
+    if (job.status !== "cancelled") return;
+    setReopenError("");
+    setReopening(true);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "reopen" }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setReopenError(data.error || "Hindi ma-reopen. Subukan muli.");
+        return;
+      }
+      setJob((prev) => ({ ...prev, status: "open" }));
+    } finally {
+      setReopening(false);
     }
   };
 
@@ -210,6 +234,44 @@ export default function HomeownerJobDetail({
               <p className="font-semibold text-danger-red">
                 Ang request na ito ay na-cancel na.
               </p>
+            </div>
+          )}
+
+          {isCancelled && (
+            <div className="mt-4 card-kumpuni bg-gradient-to-br from-orange-50 to-white border border-action-orange/20 p-6 sm:p-8 shadow-sm relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 text-action-orange/10 transform rotate-12 transition-transform group-hover:rotate-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <div className="relative z-10 max-w-lg">
+                <h3 className="font-extrabold text-action-orange text-xl sm:text-2xl mb-2">Gusto mo bang maghanap ulit?</h3>
+                <p className="text-base text-text-secondary mb-6 leading-relaxed">
+                  I-reopen ang job na ito para maghanap muli ng available na kumpunero gamit ang Fast Match.
+                </p>
+                {reopenError && (
+                  <div className="mb-4 p-3 bg-danger-light text-danger-red rounded-xl text-sm font-medium border border-danger-red/20 flex items-start gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{reopenError}</span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleReopen}
+                  disabled={reopening}
+                  className="btn-primary w-full sm:w-auto !bg-action-orange !border-action-orange hover:!bg-orange-600 inline-flex justify-center gap-2 items-center disabled:opacity-50"
+                >
+                  {reopening ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      <span>Ino-open muli...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      <span>Fast Match Ulit</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </div>
