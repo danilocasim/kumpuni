@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ReviewResponseForm({
@@ -10,6 +11,7 @@ export default function ReviewResponseForm({
   reviewId: string;
   initialResponse: string | null;
 }) {
+  const router = useRouter();
   const [response, setResponse] = useState(initialResponse ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -34,6 +36,7 @@ export default function ReviewResponseForm({
       }
       setResponse(trimmed);
       setSaved(true);
+      router.refresh();
     } finally {
       setSaving(false);
     }

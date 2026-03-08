@@ -55,6 +55,17 @@ export default async function WorkerJobPage({
     .maybeSingle();
   if (interest) alreadyInterested = true;
 
+  let employerReview: { id: string; rating: number; comment: string | null; tags: string[] | null; response: string | null; created_at: string } | null = null;
+  if (job.status === "completed" && job.worker_id === user.id) {
+    const { data: review } = await admin
+      .from("reviews")
+      .select("id, rating, comment, tags, response, created_at")
+      .eq("job_id", id)
+      .eq("reviewee_id", user.id)
+      .maybeSingle();
+    if (review) employerReview = review as typeof employerReview;
+  }
+
   return (
     <WorkerJobPageClient
       jobId={id}
@@ -77,6 +88,7 @@ export default async function WorkerJobPage({
       }}
       homeownerPhone={homeownerPhone}
       alreadyInterested={alreadyInterested}
+      employerReview={employerReview}
     />
   );
 }

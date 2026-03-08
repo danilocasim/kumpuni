@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import WorkerJobDetail from "@/components/WorkerJobDetail";
 import WorkerJobStatusActions from "@/components/WorkerJobStatusActions";
 import WorkerEarningsReport from "@/components/WorkerEarningsReport";
+import ReviewResponseForm from "@/components/ReviewResponseForm";
 
 const CATEGORY_LABELS: Record<string, string> = {
   plumbing: "Plumbing",
@@ -33,18 +34,29 @@ type JobSnapshot = {
   worker_reported_amount?: number | null;
 };
 
+type EmployerReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  tags: string[] | null;
+  response: string | null;
+  created_at: string;
+};
+
 export default function WorkerJobPageClient({
   jobId,
   currentUserId,
   initialJob,
   homeownerPhone,
   alreadyInterested,
+  employerReview,
 }: {
   jobId: string;
   currentUserId: string;
   initialJob: JobSnapshot;
   homeownerPhone: string | null;
   alreadyInterested: boolean;
+  employerReview?: EmployerReview | null;
 }) {
   const [job, setJob] = useState<JobSnapshot>(initialJob);
   const [cancelling, setCancelling] = useState(false);
@@ -263,6 +275,37 @@ export default function WorkerJobPageClient({
               </div>
               <p className="text-text-primary font-medium">Na-complete mo na ang job na ito.</p>
             </div>
+
+            {employerReview && (
+              <div className="card-kumpuni p-5 border-l-4 border-l-wood-brown/40">
+                <h3 className="text-sm font-bold text-text-tertiary uppercase tracking-wider mb-3">Review mula sa employer</h3>
+                <div className="flex items-center gap-2 text-text-tertiary text-sm mb-2">
+                  <span className="text-wood-brown font-semibold" aria-label={`${employerReview.rating} star rating`}>
+                    {"★".repeat(employerReview.rating)}{"☆".repeat(5 - employerReview.rating)}
+                  </span>
+                  <span>{new Date(employerReview.created_at).toLocaleDateString("en-PH", { dateStyle: "medium" })}</span>
+                </div>
+                {employerReview.comment && (
+                  <p className="text-text-primary leading-relaxed mb-3">{employerReview.comment}</p>
+                )}
+                {Array.isArray(employerReview.tags) && employerReview.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {employerReview.tags.map((t) => (
+                      <span key={t} className="rounded px-2 py-0.5 text-xs bg-surface-light border border-subtle text-text-secondary">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {employerReview.response && (
+                  <p className="text-text-primary text-sm pl-3 border-l-2 border-wood-brown/30 italic">Iyong response: {employerReview.response}</p>
+                )}
+                {!employerReview.response && (
+                  <ReviewResponseForm reviewId={employerReview.id} initialResponse={null} />
+                )}
+              </div>
+            )}
+
             <WorkerEarningsReport
               jobId={jobId}
               initialAmount={job.worker_reported_amount ?? null}
