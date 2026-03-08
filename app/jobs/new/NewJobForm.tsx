@@ -65,8 +65,8 @@ export default function NewJobForm() {
 
     try {
       const compressed = await imageCompression(file, {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 1200,
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 800,
         useWebWorker: true,
       });
       const reader = new FileReader();
@@ -83,7 +83,9 @@ export default function NewJobForm() {
   }, []);
 
   // ─── AI Analysis ──────────────────────────────────────────
+  const [analyzeDisabled, setAnalyzeDisabled] = useState(false);
   async function analyzePhoto(imageBase64: string, note: string) {
+    if (analyzeDisabled) return;
     setStep("analyzing");
     setAnalyzeError(null);
     try {
@@ -102,8 +104,12 @@ export default function NewJobForm() {
       setUrgency(data.urgency);
       setStep("review");
     } catch (err) {
-      setAnalyzeError(err instanceof Error ? err.message : "Hindi ma-analyze. Subukan ulit.");
+      const msg = err instanceof Error ? err.message : "Hindi ma-analyze. Subukan ulit.";
+      setAnalyzeError(msg);
       setStep("capture");
+      // Cooldown to avoid hitting rate limits with rapid retries
+      setAnalyzeDisabled(true);
+      setTimeout(() => setAnalyzeDisabled(false), 10_000);
     }
   }
 
@@ -330,7 +336,8 @@ export default function NewJobForm() {
                 <button
                   type="button"
                   onClick={() => analyzePhoto(photoPreview!, userNote)}
-                  className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2.5 shadow-lg"
+                  disabled={analyzeDisabled}
+                  className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2.5 shadow-lg disabled:opacity-50"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72z"/><path d="m14 7 3 3"/></svg>
                   I-analyze ng AI
