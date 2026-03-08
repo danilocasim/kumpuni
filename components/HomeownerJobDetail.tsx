@@ -53,6 +53,25 @@ export default function HomeownerJobDetail({
   const [cancelError, setCancelError] = useState("");
   const [reopening, setReopening] = useState(false);
   const [reopenError, setReopenError] = useState("");
+  const [hasReview, setHasReview] = useState(false);
+
+  // Check if homeowner already left a review for this job
+  useEffect(() => {
+    if (job.status !== "completed") return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("reviews")
+        .select("id")
+        .eq("job_id", jobId)
+        .eq("reviewer_id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setHasReview(true);
+        });
+    });
+  }, [job.status, jobId]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -398,16 +417,24 @@ export default function HomeownerJobDetail({
               </div>
               <div>
                 <h3 className="font-extrabold text-success-green text-xl sm:text-2xl mb-2">Tapos Na Ang Trabaho!</h3>
-                <p className="text-base text-text-secondary mb-6 leading-relaxed">
-                  Maraming salamat sa paggamit ng Kumpuni. Tulungan ang iba sa pamamagitan ng pagbibigay ng review sa kumpunero.
-                </p>
-                <Link
-                  href={`/jobs/${jobId}/review`}
-                  className="btn-primary w-full sm:w-auto !bg-success-green !border-success-green hover:!bg-green-700 bg-opacity-100 shadow-sm inline-flex justify-center items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  <span>Mag-iwan ng Review</span>
-                </Link>
+                {hasReview ? (
+                  <p className="text-base text-text-secondary leading-relaxed">
+                    Salamat sa pag-iwan ng review! Nakakatulong ito sa ibang homeowners na pumili ng tamang kumpunero.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-base text-text-secondary mb-6 leading-relaxed">
+                      Maraming salamat sa paggamit ng Kumpuni. Tulungan ang iba sa pamamagitan ng pagbibigay ng review sa kumpunero.
+                    </p>
+                    <Link
+                      href={`/jobs/${jobId}/review`}
+                      className="btn-primary w-full sm:w-auto !bg-success-green !border-success-green hover:!bg-green-700 bg-opacity-100 shadow-sm inline-flex justify-center items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                      <span>Mag-iwan ng Review</span>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
