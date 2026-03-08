@@ -62,6 +62,12 @@ export default function JobReviewForm({
         setError(insertErr.message || "Could not save review. Try again.");
         return;
       }
+      // Notify worker via push (fire-and-forget)
+      fetch("/api/push/review-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ worker_user_id: revieweeId, job_id: jobId }),
+      }).catch(() => {});
       setSubmitted(true);
     } finally {
       setSubmitting(false);
