@@ -156,14 +156,14 @@ export default async function DashboardPage({
                       </div>
                     </Link>
                     {job.status === "open" && (
-                      <div className="mt-5 flex gap-3 pt-5 border-t border-subtle relative z-10 flex-col sm:flex-row">
-                        <Link href={`/jobs/${job.id}`} className="btn-ghost flex-1 text-center py-2.5 bg-surface-light rounded-kumpuni-md hover:bg-gray-200 font-bold transition-colors">
+                      <div className="mt-5 flex flex-wrap gap-2 pt-5 border-t border-subtle relative z-10">
+                        <Link href={`/jobs/${job.id}`} className="btn-ghost grow text-center py-2.5 bg-surface-light rounded-kumpuni-md hover:bg-gray-200 font-bold transition-colors min-w-[100px]">
                           Detalye
                         </Link>
                         {job.matching_mode === "flexible" && (
                           <Link
                             href={`/jobs/${job.id}/browse`}
-                            className="btn-secondary flex-none font-bold"
+                            className="btn-secondary grow flex items-center justify-center py-2.5 font-bold min-w-[140px]"
                           >
                             Pumili
                           </Link>
@@ -171,7 +171,7 @@ export default async function DashboardPage({
                         {job.matching_mode === "fast" && (
                           <Link
                             href={`/jobs/${job.id}/fast`}
-                            className="btn-primary shadow-md flex-none py-2.5 font-bold"
+                            className="btn-primary shadow-md grow flex items-center justify-center py-2.5 font-bold min-w-[160px]"
                           >
                             Tingnan ang Matches
                           </Link>
@@ -182,10 +182,10 @@ export default async function DashboardPage({
                       <div className="mt-5 pt-5 border-t border-subtle relative z-10">
                         <Link
                           href={`/jobs/${job.id}/review`}
-                          className="btn-primary w-full shadow-md flex justify-center gap-2 !bg-success-green hover:!bg-green-700 !border-success-green font-bold"
+                          className="btn-primary w-full shadow-md flex items-center justify-center gap-2 !bg-success-green hover:!bg-green-700 !border-success-green font-bold flex-nowrap whitespace-nowrap"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                          Mag-iwan ng Review
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                          <span>Mag-iwan ng Review</span>
                         </Link>
                       </div>
                     )}
@@ -205,7 +205,7 @@ export default async function DashboardPage({
                 <Settings className="w-5 h-5" />
               </button>
             </h2>
-            
+
             <div className="flex flex-col items-center mb-6 text-center">
               <div className="w-24 h-24 rounded-full bg-white border-4 border-surface-light shadow-sm flex items-center justify-center overflow-hidden mb-4 relative group">
                 {userRow?.avatar_url ? (

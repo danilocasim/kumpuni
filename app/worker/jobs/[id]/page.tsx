@@ -63,7 +63,7 @@ export default async function WorkerJobPage({
       .eq("job_id", id)
       .eq("reviewee_id", user.id)
       .maybeSingle();
-    if (review) employerReview = review as typeof employerReview;
+    if (review) employerReview = review as unknown as typeof employerReview;
   }
 
   return (
